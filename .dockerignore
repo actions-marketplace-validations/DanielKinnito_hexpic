@@ -1,0 +1,6 @@
+node_modules
+dist
+demo
+.gitignore
+README.md
+LICENSE
