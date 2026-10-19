@@ -1,31 +1,31 @@
-# HexPic
+# hexpic
 
-> **Studio-grade image to ASCII conversion plugin** for modern websites, React apps, and Node.js. Powered by error-diffusion dithering, edge detection, and full-color HTML rendering.
+Browser and Node.js image-to-ASCII converter with error-diffusion dithering, edge convolution, and color HTML output.
 
-HexPic eliminates the need for external tools or clunky server-side uploads. It processes images directly inside the browser using HTML5 Canvas, producing crisp, high-definition ASCII art with the same algorithmic techniques used by professional text-art tools like [asciiart.eu](https://www.asciiart.eu/image-to-ascii).
-
----
-
-## ✨ Features
-
-- 🎯 **Advanced Dithering Algorithms**: Atkinson (classic Mac stippling), Floyd-Steinberg, JJN, and Stucki error diffusion to eliminate muddy banding.
-- 📐 **Sobel Edge Detection & 3×3 Sharpening**: Accentuate facial features, hair, text, and silhouettes with precision convolution kernels.
-- 🎨 **Full-Color TrueColor Output**: Render ASCII in monochrome or full-color HTML with styled `<span style="color:rgb(...)">` glyphs.
-- 🔠 **Curated Character Presets**: `codepage437` (DOS block `█▓▒░`), `blockelement`, `minimalist` (`#+- .`), `braille`, `extended`, `math`, `alphanumeric`, and `grayscale`.
-- 🌌 **Space Density Filter**: Clean negative space that prevents dirty punctuation clutter in image backgrounds.
-- 🔌 **Zero-Effort Drop-in Plugin**: Convert existing `<img>` tags simply with `data-hexpic` attributes and `HexPic.init()`.
-- ⚛️ **First-Class React Support**: Includes a responsive `useHexPic` hook and `<HexPicImage />` drop-in component.
-- 💾 **Export Pipeline**: One-click Copy to Clipboard, Download `.txt`, and Render-to-PNG export.
+Processes images directly on the client using the HTML5 Canvas API without external servers or native binary dependencies.
 
 ---
 
-## 🚀 Installation
+## Features
+
+- **Dithering algorithms**: Atkinson, Floyd-Steinberg, Jarvis-Judice-Ninke (JJN), and Stucki error-diffusion routines to prevent posterization and tonal banding.
+- **Spatial convolution**: 3x3 Sobel edge detection and unsharp masking sharpen kernels to preserve outlines, contours, and facial features.
+- **TrueColor HTML rendering**: Generates both plaintext character grids and styled HTML `<span>` elements preserving source 24-bit RGB values.
+- **Character palettes**: Built-in presets for standard ASCII, Code Page 437 (`█▓▒░`), Block Elements (`█▀▄▌▐░▒▓`), Braille (`⣿⣶⣤⣀`), minimalist, numeric, math symbols, and custom strings.
+- **Negative space padding**: Configurable whitespace density to suppress stray punctuation marks on light or uniform backgrounds.
+- **Aspect ratio correction**: Built-in `0.55` font aspect ratio scaler to counter vertical stretching inherent to monospace typefaces.
+- **Framework and runtime support**: Native ES modules (Vite, Next.js, Remix, Astro), CommonJS, UMD script tag, and React components (`<HexPicImage />`, `useHexPic`).
+- **Export helpers**: Utilities for clipboard copying, `.txt` file generation, and raster PNG rendering via offscreen canvas.
+
+---
+
+## Installation
 
 ```bash
 npm install hexpic
 ```
 
-Or drop the UMD bundle directly into HTML:
+For browser environments without a build step:
 
 ```html
 <script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"></script>
@@ -33,101 +33,106 @@ Or drop the UMD bundle directly into HTML:
 
 ---
 
-## 💡 Usage
+## Usage
 
-### 1. Zero-Effort Drop-in HTML Plugin
+### Declarative HTML Plugin
 
-Tag any `<img>` tag on your website with `data-hexpic` and call `HexPic.init()`:
+Add `data-hexpic` to any `<img>` element and call `HexPic.init()`:
 
 ```html
-<!-- Automatically converted on load -->
 <img 
-  src="portrait.jpg" 
+  src="/images/profile.jpg" 
   data-hexpic 
   data-hexpic-width="100" 
   data-hexpic-dithering="atkinson" 
   data-hexpic-charset="blockelement" 
+  data-hexpic-color-mode="color"
 />
 
-<script src="dist/index.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"></script>
 <script>
   HexPic.init();
 </script>
 ```
 
----
-
-### 2. JavaScript / TypeScript API
+### TypeScript / JavaScript API
 
 ```typescript
 import HexPic from 'hexpic';
 
-const hexpic = new HexPic({
+const converter = new HexPic({
   width: 100,
-  dithering: 'atkinson',      // 'atkinson' | 'floyd-steinberg' | 'jjn' | 'stucki' | 'none'
-  charset: 'blockelement',    // or 'normal', 'codepage437', 'braille', 'minimalist', etc.
-  spaceDensity: 2,            // Suppresses noise in background whitespace
-  useSharpen: true,           // 3x3 unsharp convolution kernel
-  useEdgeDetection: true,     // Sobel edge filter
-  edgeIntensity: 1.2,
-  contrast: 110,
+  dithering: 'atkinson',
+  charset: 'blockelement',
+  colorMode: 'color',
+  useSharpen: true,
+  useEdgeDetection: true,
+  edgeIntensity: 1.0,
+  spaceDensity: 1,
+  contrast: 105,
   brightness: 100
 });
 
-// Convert from URL, File, or <img> element
-const result = await hexpic.fromUrl('avatar.png');
+// Accepts URL string, File object, or HTMLImageElement
+const result = await converter.fromUrl('/avatar.png');
 
-// Plain text ASCII
+// Plaintext output
 console.log(result.ascii);
 
-// Colored HTML
-document.getElementById('art').innerHTML = result.html;
+// Colored HTML output
+document.getElementById('output').innerHTML = result.html;
 
-// Export actions
+// Export methods
 await result.copyToClipboard();
-result.saveAsText('my-art.txt');
-result.saveAsPng('my-art.png', 12);
+result.saveAsText('output.txt');
+result.saveAsPng('output.png', 12);
 ```
 
----
+### React / Next.js
 
-### 3. React / Next.js
+HexPic components are SSR-safe and execute canvas routines after client mount:
 
 ```tsx
+'use client';
+
 import React from 'react';
 import { HexPicImage, useHexPic } from 'hexpic';
 
-// Option A: Drop-in Component
-export function ProfileBanner() {
+// Component
+export function Avatar() {
   return (
     <HexPicImage
-      src="/avatar.jpg"
-      alt="User Profile"
+      src="/user.jpg"
+      alt="User Avatar"
       options={{
-        width: 120,
+        width: 80,
         dithering: 'atkinson',
-        charset: 'blockelement',
-        colorMode: 'color' // Full-color TrueColor HTML rendering
+        charset: 'codepage437',
+        colorMode: 'color'
       }}
-      style={{ fontSize: '8px', lineHeight: '8px' }}
+      style={{ fontSize: '7px', lineHeight: '7px' }}
     />
   );
 }
 
-// Option B: Interactive Hook
-export function AsciiEditor() {
-  const { ascii, html, convert, copyToClipboard, saveAsPng, isLoading } = useHexPic({
-    width: 100,
-    dithering: 'atkinson',
+// Hook
+export function Editor() {
+  const { ascii, convert, copyToClipboard, saveAsPng, isLoading } = useHexPic({
+    width: 90,
+    dithering: 'floyd-steinberg',
     charset: 'normal'
   });
 
   return (
     <div>
-      <input type="file" onChange={(e) => e.target.files?.[0] && convert(e.target.files[0])} />
+      <input 
+        type="file" 
+        accept="image/*" 
+        onChange={(e) => e.target.files?.[0] && convert(e.target.files[0])} 
+      />
       <button onClick={() => copyToClipboard()}>Copy</button>
-      <button onClick={() => saveAsPng('art.png')}>Download PNG</button>
-      <pre>{isLoading ? 'Converting...' : ascii}</pre>
+      <button onClick={() => saveAsPng('art.png')}>Save PNG</button>
+      <pre>{isLoading ? 'Processing...' : ascii}</pre>
     </div>
   );
 }
@@ -135,54 +140,51 @@ export function AsciiEditor() {
 
 ---
 
-## ⚙️ Options Reference
+## Configuration
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `width` | `number` | `80` | Number of character columns in output |
-| `height` | `number` | `40` | Height in rows (auto-scaled when aspect ratio is preserved) |
-| `dithering` | `'none' \| 'atkinson' \| 'floyd-steinberg' \| 'jjn' \| 'stucki'` | `'none'` | Error-diffusion algorithm for smooth gradient shading |
-| `charset` | `CharsetPreset \| string` | `'normal'` | Preset or custom characters ordered darkest to lightest |
-| `colorMode` | `'monochrome' \| 'color'` | `'monochrome'` | Plain text or TrueColor HTML `<span>` elements |
-| `spaceDensity` | `number` | `1` | Adds padding spaces to light end to eliminate dirty punctuation on backgrounds |
-| `useEdgeDetection` | `boolean` | `false` | Sobel 3×3 edge filter to bring out outlines and features |
-| `edgeIntensity` | `number` | `1.0` | Multiplier for edge contrast (0.1 to 2.0) |
-| `useSharpen` | `boolean` | `false` | 3×3 unsharp convolution kernel |
-| `sharpness` | `number` | `9` | Center weight for sharpening kernel (1 to 20) |
-| `useThreshold` | `boolean` | `false` | Binary thresholding cutoff |
-| `thresholdOffset` | `number` | `128` | Cutoff luminance (0 to 255) |
-| `contrast` | `number` | `100` | Contrast percentage (0 to 250%) |
-| `brightness` | `number` | `100` | Brightness percentage (0 to 250%) |
-| `saturation` | `number` | `100` | Color saturation percentage (0 to 400%) |
-| `hue` | `number` | `0` | Hue rotation angle in degrees (0 to 360°) |
-| `grayscale` | `number` | `0` | Grayscale filter percentage (0 to 100%) |
-| `sepia` | `number` | `0` | Sepia filter percentage (0 to 100%) |
-| `invert` | `boolean` | `false` | Invert brightness and character palette |
+| `width` | `number` | `80` | Number of horizontal character columns |
+| `height` | `number` | `40` | Number of vertical rows (calculated automatically if `preserveAspectRatio` is true) |
+| `dithering` | `'none' \| 'atkinson' \| 'floyd-steinberg' \| 'jjn' \| 'stucki'` | `'none'` | Error-diffusion dithering algorithm |
+| `charset` | `CharsetPreset \| string` | `'normal'` | Built-in preset name or custom character palette ordered darkest to lightest |
+| `colorMode` | `'monochrome' \| 'color'` | `'monochrome'` | Plain text monospace or 24-bit color HTML `<span>` output |
+| `spaceDensity` | `number` | `1` | Padding spaces appended to character palette to suppress background noise |
+| `useEdgeDetection` | `boolean` | `false` | Apply 3x3 Sobel convolution edge detection |
+| `edgeIntensity` | `number` | `1.0` | Sobel gradient magnitude multiplier (0.1 to 2.0) |
 | `invertEdgeColors` | `boolean` | `true` | Invert edge detection map for dark lines on bright backgrounds |
-| `transparentFrame` | `number` | `0` | Border frame padding in characters (0 to 20) |
-| `preserveAspectRatio` | `boolean` | `true` | Maintain source aspect ratio automatically |
-| `fontAspectRatio` | `number` | `0.55` | Monospace character width-to-height ratio (0.55 prevents tall vertical stretching) |
+| `useSharpen` | `boolean` | `false` | Apply 3x3 unsharp masking convolution kernel |
+| `sharpness` | `number` | `9` | Center weight for sharpening kernel (1 to 20) |
+| `useThreshold` | `boolean` | `false` | Binary luminance thresholding |
+| `thresholdOffset` | `number` | `128` | Threshold luminance cutoff point (0 to 255) |
+| `contrast` | `number` | `100` | Contrast percentage adjustment (0 to 250) |
+| `brightness` | `number` | `100` | Brightness percentage adjustment (0 to 250) |
+| `saturation` | `number` | `100` | Color saturation percentage adjustment (0 to 400) |
+| `hue` | `number` | `0` | Color hue rotation in degrees (0 to 360) |
+| `grayscale` | `number` | `0` | Grayscale filter intensity (0 to 100) |
+| `sepia` | `number` | `0` | Sepia filter intensity (0 to 100) |
+| `invert` | `boolean` | `false` | Invert luminance map |
+| `transparentFrame` | `number` | `0` | Outer border frame padding in character units (0 to 20) |
+| `preserveAspectRatio` | `boolean` | `true` | Compute output height from input image aspect ratio |
+| `fontAspectRatio` | `number` | `0.55` | Monospace character width-to-height ratio used for height correction |
 
 ---
 
-## 🥊 Comparison with Other Solutions
+## Comparison
 
-| Feature | **HexPic** | Legacy `image-to-ascii` | `ascii-art` | Generic Canvas/Image Plugins |
+| Capability | hexpic | image-to-ascii | ascii-art | Generic Canvas Filters |
 |---|:---:|:---:|:---:|:---:|
-| **Zero-Server Client Execution** | ✅ Yes (Pure Canvas & DOM) | ❌ Node.js only (canvas/C++ bindings) | ❌ Server / CLI focused | ✅ Client |
-| **Drop-in `<img data-hexpic>`** | ✅ Automatic (`HexPic.init()`) | ❌ None | ❌ None | Varies |
-| **Spatial Error Dithering** | ✅ Atkinson, Floyd-Steinberg, JJN, Stucki | ❌ None (harsh banding) | ⚠️ Basic dithering | ❌ Not applicable |
-| **Sobel Edge Detection** | ✅ Built-in 3×3 convolution | ❌ None | ❌ None | ❌ Extra plugin required |
-| **Unsharp Masking Sharpen** | ✅ Built-in 3×3 kernel | ❌ None | ❌ None | ❌ Extra plugin required |
-| **Aspect Ratio Compensation** | ✅ Automatic (`0.55` ratio correction) | ❌ Manual math (often stretched) | ⚠️ Inconsistent | ❌ None |
-| **Color Modes** | ✅ Monochrome & TrueColor HTML | ⚠️ ANSI terminal strings only | ⚠️ ANSI / rudimentary HTML | ✅ Raster RGB |
-| **React Component & Hook** | ✅ `<HexPicImage />` & `useHexPic` | ❌ None | ❌ None | ⚠️ Component only |
-| **Export Utilities** | ✅ Clipboard, `.txt`, Canvas PNG | ❌ Manual stream handling | ❌ CLI only | ⚠️ Download canvas only |
-| **Interactive Studio GUI** | ✅ Full live web demo with drag resize | ❌ None | ❌ None | ❌ Static |
+| Client-side execution | Yes (browser Canvas) | No (Node.js runtime required) | No (CLI / server focused) | Yes |
+| Declarative `<img data-hexpic>` | Yes | No | No | Varies |
+| Error-diffusion dithering | Atkinson, Floyd-Steinberg, JJN, Stucki | No | Basic | N/A |
+| Edge detection & sharpening | Built-in 3x3 convolution | No | No | Requires extra libraries |
+| Monospace aspect correction | Automatic (`fontAspectRatio: 0.55`) | Manual calculation | Inconsistent | N/A |
+| Color output | TrueColor 24-bit HTML | ANSI terminal codes | ANSI / HTML strings | Raster RGB |
+| React component & hook | Yes (`<HexPicImage />`, `useHexPic`) | No | No | Component only |
+| Export utilities | Clipboard, `.txt`, Canvas PNG | Stream pipe | Console output | Canvas download |
 
 ---
 
-## 📜 License
+## License
 
-MIT © [Daniel Kinnito](https://github.com/DanielKinnito)
-
+MIT
