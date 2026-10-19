@@ -2,6 +2,8 @@
 
 Browser and Node.js image-to-ASCII converter with error-diffusion dithering, edge convolution, and color HTML output.
 
+[Live Demo](https://danielkinnito.github.io/hexpic/)
+
 Processes images directly on the client using the HTML5 Canvas API without external servers or native binary dependencies.
 
 ---

@@ -109,6 +109,11 @@ nav a:hover {
   .workspace-grid {
     grid-template-columns: 1fr;
   }
+  .output-panel {
+    position: static;
+    height: 550px;
+    margin-top: 1.5rem;
+  }
 }
 
 .panel {
