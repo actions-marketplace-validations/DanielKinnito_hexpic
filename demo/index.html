@@ -34,15 +34,15 @@
         </div>
 
         <!-- Drop area -->
-        <label for="fileInput" class="drop-zone" id="dropZone" style="display: block; cursor: pointer;">
+        <div class="drop-zone" id="dropZone" style="display: block; cursor: pointer;">
           <div class="drop-icon">📷</div>
           <div class="drop-text">
             <strong>Click to browse</strong> or drag & drop an image<br>
             <span style="font-size: 0.8rem; opacity: 0.7;">PNG, JPG, WebP, SVG supported</span>
           </div>
-          <button type="button" class="btn btn-primary" style="margin-top: 0.75rem; pointer-events: none; font-size: 0.85rem; padding: 0.4rem 0.9rem;">Choose Image File</button>
+          <button type="button" id="btnChooseFile" class="btn btn-primary" style="margin-top: 0.75rem; font-size: 0.85rem; padding: 0.4rem 0.9rem;">Choose Image File</button>
           <input type="file" id="fileInput" accept="image/*" style="display: none;">
-        </label>
+        </div>
 
         <!-- Preview canvas -->
         <div class="thumb-container">
@@ -319,12 +319,13 @@
   <script src="./dist/index.umd.js"></script>
   <script>
     const HexPicEngine = (window.HexPic && (window.HexPic.HexPic || window.HexPic.default)) || window.HexPic;
-    const hexpic = new HexPicEngine();
+    const hexpic = typeof HexPicEngine === 'function' ? new HexPicEngine() : null;
     let currentResult = null;
     let loadedImage = new Image();
 
     // DOM Elements
     const dropZone = document.getElementById('dropZone');
+    const btnChooseFile = document.getElementById('btnChooseFile');
     const fileInput = document.getElementById('fileInput');
     const previewCanvas = document.getElementById('previewCanvas');
     const asciiDisplay = document.getElementById('asciiDisplay');
@@ -407,6 +408,10 @@
 
     async function render() {
       if (!loadedImage.complete || !loadedImage.width) return;
+      if (!hexpic) {
+        outputStatus.textContent = 'Error: HexPic engine not initialized. Check dist/index.umd.js.';
+        return;
+      }
 
       const isLocked = preserveAspectRatioInput.checked;
       const charsetVal = charsetSelect.value === 'custom' ? customCharset.value : charsetSelect.value;
@@ -653,19 +658,52 @@
       asciiDisplay.style.lineHeight = `${(targetFontSize * lineHMultiplier)}px`;
     });
 
-    // File Drag & Drop
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
-    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault();
-      dropZone.classList.remove('dragover');
-      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-        handleFile(e.dataTransfer.files[0]);
-      }
+    // File Browse & Drag & Drop Handling
+    dropZone.addEventListener('click', () => {
+      fileInput.click();
     });
+
+    if (btnChooseFile) {
+      btnChooseFile.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+      });
+    }
+
+    fileInput.addEventListener('click', (e) => {
+      e.stopPropagation();
+      fileInput.value = '';
+    });
+
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
         handleFile(e.target.files[0]);
+      }
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    // Window-level drag-drop fallback prevents browser from navigating away
+    window.addEventListener('dragover', (e) => e.preventDefault());
+    window.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
       }
     });
 

@@ -424,7 +424,4 @@ jest.setup.tsx
 jest-environment-jsdom
 jest-environment-jsdom.config.js
 jest-environment-jsdom.config.ts
-jest-environment-jsdom.config.tsx
-
-# demo artifacts
-demo/dist
+jest-environment-jsdom.config.tsx

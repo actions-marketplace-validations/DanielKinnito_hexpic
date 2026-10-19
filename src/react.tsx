@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { HexPic } from './HexPic';
 import { AsciiArtOptions, AsciiArtResult } from './types';
