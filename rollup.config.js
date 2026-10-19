@@ -9,6 +9,7 @@ export default {
     {
       file: 'dist/index.js', // CommonJS
       format: 'cjs',
+      exports: 'named',
       sourcemap: true,
     },
     {

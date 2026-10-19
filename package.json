@@ -23,7 +23,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "demo": "npx serve -s",
+    "demo": "node scripts/serve.js",
+    "serve": "node scripts/serve.js",
     "build:demo": "npm run build && node -e \"require('fs').cpSync('dist', 'demo/dist', {recursive: true})\""
   },
   "keywords": [

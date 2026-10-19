@@ -19,7 +19,7 @@
       "jest",
       "node"
     ],
-    "jsx": "react-jsx"
+    "jsx": "react"
   },
   "include": [
     "src"

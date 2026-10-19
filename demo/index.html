@@ -1,175 +1,743 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HexPic Portfolio Demo</title>
+  <title>HexPic Studio — High-Precision Image to ASCII Plugin</title>
   <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
   <div class="container">
     <header>
-      <div class="logo">HexPic</div>
+      <div class="logo-group">
+        <div class="logo">HexPic</div>
+        <span class="badge">v0.2.0 Studio</span>
+      </div>
       <nav>
-        <a href="#">Home</a>
-        <a href="#">Projects</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
+        <a href="#studio">Studio</a>
+        <a href="#quickstart">Quickstart</a>
+        <a href="https://github.com/DanielKinnito/hexpic" target="_blank" rel="noopener">GitHub</a>
       </nav>
     </header>
 
-    <main class="hero">
-      <div class="hero-content">
-        <h1>Turn Images into<br>ASCII Art</h1>
-        <p class="subtitle">A lightweight TypeScript library for your creative projects.</p>
+    <div class="hero-banner">
+      <h1>Turn Any Image Into Stunning ASCII Art</h1>
+      <p>Zero-dependency browser engine with Atkinson & Floyd-Steinberg dithering, Sobel edge detection, and full-color HTML export.</p>
+    </div>
 
-        <div class="controls">
-          <h3>Try it yourself</h3>
-          <p>Upload an image to see the magic happen. Hover over the image to reveal the ASCII version!</p>
+    <div class="workspace-grid" id="studio">
+      <!-- Left Sidebar: Controls -->
+      <aside class="panel">
+        <div class="panel-header">
+          <span>Source & Image</span>
+          <button id="btnReset" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Reset All</button>
+        </div>
 
-          <div style="margin-top: 1.5rem;">
-            <label for="imageInput" class="file-label">Upload Image</label>
-            <input type="file" id="imageInput" accept="image/*">
-            <button id="downloadBtn" class="btn" disabled>Download ASCII</button>
+        <!-- Drop area -->
+        <label for="fileInput" class="drop-zone" id="dropZone" style="display: block; cursor: pointer;">
+          <div class="drop-icon">📷</div>
+          <div class="drop-text">
+            <strong>Click to browse</strong> or drag & drop an image<br>
+            <span style="font-size: 0.8rem; opacity: 0.7;">PNG, JPG, WebP, SVG supported</span>
+          </div>
+          <button type="button" class="btn btn-primary" style="margin-top: 0.75rem; pointer-events: none; font-size: 0.85rem; padding: 0.4rem 0.9rem;">Choose Image File</button>
+          <input type="file" id="fileInput" accept="image/*" style="display: none;">
+        </label>
+
+        <!-- Preview canvas -->
+        <div class="thumb-container">
+          <canvas id="previewCanvas"></canvas>
+        </div>
+
+        <!-- Quality & Algorithm Section -->
+        <div class="control-section">
+          <div class="section-title">Quality & Algorithm</div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="dithering">Dithering Diffusion</label>
+            </div>
+            <select id="dithering">
+              <option value="none">None (Posterized)</option>
+              <option value="atkinson" selected>Atkinson (Classic Mac / Retro Stipple)</option>
+              <option value="floyd-steinberg">Floyd-Steinberg</option>
+              <option value="jjn">Jarvis, Judice & Ninke (JJN)</option>
+              <option value="stucki">Stucki Dithering</option>
+            </select>
           </div>
 
-          <div class="settings">
-            <div class="setting-group">
-              <label>Width (chars)</label>
-              <input type="number" id="width" value="100">
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="charsetSelect">ASCII Gradient / Charset</label>
             </div>
-            <div class="setting-group">
-              <label>Contrast</label>
-              <input type="range" id="contrast" min="0" max="2" step="0.1" value="1">
+            <select id="charsetSelect">
+              <option value="normal" selected>Normal (@%#*+=-:.)</option>
+              <option value="normal2">Normal 2 (&$Xx+;:.)</option>
+              <option value="blockelement">Block Elements (█▀▄▌▐░▒▓)</option>
+              <option value="codepage437">Code Page 437 (█▓▒░)</option>
+              <option value="minimalist">Minimalist (#+-.)</option>
+              <option value="grayscale">Extended Grayscale</option>
+              <option value="alphanumeric">Alphanumeric</option>
+              <option value="math">Mathematics (+-×÷=≠≈∞√π)</option>
+              <option value="braille">Braille (⣿⣶⣤⣀)</option>
+              <option value="max">Max Density Matrix</option>
+              <option value="custom">Custom Charset...</option>
+            </select>
+            <input type="text" id="customCharset" placeholder="Custom charset (darkest to lightest)" style="display: none; margin-top: 0.4rem;">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="colorMode">Rendering Mode</label>
             </div>
-            <div class="setting-group">
-              <label>Brightness</label>
-              <input type="range" id="brightness" min="-1" max="1" step="0.1" value="0">
+            <select id="colorMode">
+              <option value="monochrome" selected>Monochrome (Plain ASCII)</option>
+              <option value="color">Full Color (TrueColor HTML Spans)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="spaceDensity">Space Density (Clean Backgrounds)</label>
+              <span class="val-badge" id="valSpaceDensity">1</span>
             </div>
-            <div class="setting-group">
-              <label>Invert</label>
-              <div style="display: flex; align-items: center;">
-                <input type="checkbox" id="invert"> <span style="margin-left: 0.5rem;">Invert Colors</span>
-              </div>
-            </div>
-            <div class="setting-group" style="grid-column: 1 / -1;">
-              <label>Charset</label>
-              <input type="text" id="charset"
-                value="$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,&quot;^`'. "
-                style="width: 100%;">
-            </div>
+            <input type="range" id="spaceDensity" min="0" max="15" value="1">
           </div>
         </div>
-      </div>
 
-      <div class="profile-container" id="profileContainer">
-        <img src="profile.png" alt="Profile" class="profile-image" id="profileImage">
-        <div class="ascii-output" id="asciiOutput"></div>
+        <!-- Dimensions & Proportions -->
+        <div class="control-section">
+          <div class="section-title">Dimensions & Stretch</div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="width">Width (Characters)</label>
+              <span class="val-badge" id="valWidth">100</span>
+            </div>
+            <input type="range" id="width" min="20" max="250" value="100">
+          </div>
+
+          <div class="switch-row">
+            <label class="switch-label">
+              <input type="checkbox" id="preserveAspectRatio" checked>
+              Lock Aspect Ratio
+            </label>
+          </div>
+
+          <div class="form-group" id="heightGroup" style="display: none;">
+            <div class="form-label-row">
+              <label for="height">Custom Height (Rows)</label>
+              <span class="val-badge" id="valHeight">55</span>
+            </div>
+            <input type="range" id="height" min="10" max="200" value="55">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="fontAspectRatio">Vertical Stretch (Character Ratio)</label>
+              <span class="val-badge" id="valFontAspectRatio">0.55</span>
+            </div>
+            <input type="range" id="fontAspectRatio" min="0.25" max="1.50" step="0.05" value="0.55">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="lineHeightSlider">Line Spacing (Vertical Packing)</label>
+              <span class="val-badge" id="valLineHeight">0.60em</span>
+            </div>
+            <input type="range" id="lineHeightSlider" min="0.30" max="1.20" step="0.05" value="0.60">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="transparentFrame">Transparent Frame (Border)</label>
+              <span class="val-badge" id="valFrame">0px</span>
+            </div>
+            <input type="range" id="transparentFrame" min="0" max="20" value="0">
+          </div>
+        </div>
+
+        <!-- Detail & Convolutions -->
+        <div class="control-section">
+          <div class="section-title">Detail Enhancements</div>
+
+          <div class="switch-row">
+            <label class="switch-label">
+              <input type="checkbox" id="useEdgeDetection">
+              Sobel Edge Detection
+            </label>
+            <span class="val-badge" id="valEdge">1.0</span>
+          </div>
+          <div class="form-group" id="edgeControls" style="display: none;">
+            <input type="range" id="edgeIntensity" min="0.1" max="2.0" step="0.1" value="1.0">
+            <div class="switch-row" style="margin-top: 0.5rem;">
+              <label class="switch-label" style="font-size: 0.8rem; color: #a5b4fc;">
+                <input type="checkbox" id="invertEdgeColors" checked>
+                Invert Edge Colors (Dark Edges)
+              </label>
+            </div>
+          </div>
+
+          <div class="switch-row">
+            <label class="switch-label">
+              <input type="checkbox" id="useSharpen">
+              3×3 Sharpening Kernel
+            </label>
+            <span class="val-badge" id="valSharpen">9</span>
+          </div>
+          <div class="form-group" id="sharpenControls" style="display: none;">
+            <input type="range" id="sharpness" min="1" max="20" step="1" value="9">
+          </div>
+
+          <div class="switch-row">
+            <label class="switch-label">
+              <input type="checkbox" id="useThreshold">
+              Hard Thresholding
+            </label>
+            <span class="val-badge" id="valThreshold">128</span>
+          </div>
+          <div class="form-group" id="thresholdControls" style="display: none;">
+            <input type="range" id="thresholdOffset" min="0" max="255" value="128">
+          </div>
+        </div>
+
+        <!-- Color Grading -->
+        <div class="control-section">
+          <div class="section-title">Color Grading</div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="contrast">Contrast</label>
+              <span class="val-badge" id="valContrast">100%</span>
+            </div>
+            <input type="range" id="contrast" min="0" max="250" value="100">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="brightness">Brightness</label>
+              <span class="val-badge" id="valBrightness">100%</span>
+            </div>
+            <input type="range" id="brightness" min="0" max="250" value="100">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="saturation">Saturation</label>
+              <span class="val-badge" id="valSaturation">100%</span>
+            </div>
+            <input type="range" id="saturation" min="0" max="400" value="100">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="hue">Hue Rotation</label>
+              <span class="val-badge" id="valHue">0°</span>
+            </div>
+            <input type="range" id="hue" min="0" max="360" value="0">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="grayscale">Grayscale Filter</label>
+              <span class="val-badge" id="valGrayscale">0%</span>
+            </div>
+            <input type="range" id="grayscale" min="0" max="100" value="0">
+          </div>
+
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="sepia">Sepia Filter</label>
+              <span class="val-badge" id="valSepia">0%</span>
+            </div>
+            <input type="range" id="sepia" min="0" max="100" value="0">
+          </div>
+
+          <div class="switch-row">
+            <label class="switch-label">
+              <input type="checkbox" id="invert">
+              Invert Brightness
+            </label>
+          </div>
+        </div>
+
+        <!-- Action Toolbar -->
+        <div class="action-grid">
+          <button id="btnCopy" class="btn btn-primary">📋 Copy Text</button>
+          <button id="btnDownloadTxt" class="btn btn-secondary">💾 Save .TXT</button>
+          <button id="btnDownloadPng" class="btn btn-success" style="grid-column: 1 / -1;">🎨 Download Canvas PNG</button>
+        </div>
+      </aside>
+
+      <!-- Right: Live ASCII Output (Sticky on Scroll) -->
+      <main class="output-panel">
+        <div class="output-header">
+          <div class="output-status" id="outputStatus">Rendering...</div>
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <div style="display: flex; gap: 0.35rem; align-items: center;">
+              <label style="font-size: 0.8rem; color: #9ca3af;">Zoom:</label>
+              <input type="range" id="fontSizeSlider" min="4" max="18" value="9" style="width: 70px;">
+              <span class="val-badge" id="valFontSize">9px</span>
+            </div>
+            <button id="btnFit" class="btn btn-secondary" style="padding: 0.2rem 0.55rem; font-size: 0.75rem;">Fit Screen</button>
+          </div>
+        </div>
+        <div class="output-body" id="outputContainer">
+          <div class="ascii-viewport-wrapper" id="resizableWrapper" title="Grab edges or bottom-right corner to resize with mouse!">
+            <div id="asciiDisplay"></div>
+            <div class="drag-handle handle-br" id="handleBR" title="Drag corner to resize Width & Height with mouse"></div>
+            <div class="drag-handle handle-r" id="handleR" title="Drag to stretch Width"></div>
+            <div class="drag-handle handle-b" id="handleB" title="Drag to stretch Height"></div>
+            <div class="drag-dimensions-tag" id="dragDimensionsTag">100 × 55 chars</div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Drop-in Plugin Quickstart Guide -->
+    <section class="plugin-docs" id="quickstart">
+      <h2>🔌 Zero-Effort Drop-in Plugin Usage</h2>
+      <p style="color: var(--text-muted); margin-top: 0.25rem;">
+        Enable ASCII art anywhere on your web application simply with attributes or one line of JS:
+      </p>
+
+      <div class="code-box">
+<span style="color: #64748b;">&lt;!-- 1. Include the UMD bundle from CDN or local --&gt;</span>
+&lt;script src="dist/index.umd.js"&gt;&lt;/script&gt;
+
+<span style="color: #64748b;">&lt;!-- 2. Add data-hexpic to any image tag --&gt;</span>
+&lt;img src="avatar.png" data-hexpic data-hexpic-width="120" data-hexpic-dithering="atkinson" /&gt;
+
+<span style="color: #64748b;">&lt;!-- 3. Auto-convert with HexPic.init() --&gt;</span>
+&lt;script&gt;
+  HexPic.init();
+&lt;/script&gt;
       </div>
-    </main>
+    </section>
   </div>
 
-  <script type="module">
-    import HexPic from './dist/index.esm.js';
+  <script src="./dist/index.umd.js"></script>
+  <script>
+    const HexPicEngine = (window.HexPic && (window.HexPic.HexPic || window.HexPic.default)) || window.HexPic;
+    const hexpic = new HexPicEngine();
+    let currentResult = null;
+    let loadedImage = new Image();
 
-    const hexpic = new HexPic();
-    const imageInput = document.getElementById('imageInput');
-    const profileImage = document.getElementById('profileImage');
-    const asciiOutput = document.getElementById('asciiOutput');
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const previewCanvas = document.getElementById('previewCanvas');
+    const asciiDisplay = document.getElementById('asciiDisplay');
+    const outputStatus = document.getElementById('outputStatus');
+    const outputContainer = document.getElementById('outputContainer');
+    const resizableWrapper = document.getElementById('resizableWrapper');
+    const handleBR = document.getElementById('handleBR');
+    const handleR = document.getElementById('handleR');
+    const handleB = document.getElementById('handleB');
+    const dragDimensionsTag = document.getElementById('dragDimensionsTag');
+    const btnFit = document.getElementById('btnFit');
+
+    // Controls
+    const ditheringInput = document.getElementById('dithering');
+    const charsetSelect = document.getElementById('charsetSelect');
+    const customCharset = document.getElementById('customCharset');
+    const colorModeInput = document.getElementById('colorMode');
     const widthInput = document.getElementById('width');
+    const preserveAspectRatioInput = document.getElementById('preserveAspectRatio');
+    const heightInput = document.getElementById('height');
+    const heightGroup = document.getElementById('heightGroup');
+    const fontAspectRatioInput = document.getElementById('fontAspectRatio');
+    const lineHeightSlider = document.getElementById('lineHeightSlider');
+    const spaceDensityInput = document.getElementById('spaceDensity');
+    const transparentFrameInput = document.getElementById('transparentFrame');
+    const useEdgeDetectionInput = document.getElementById('useEdgeDetection');
+    const edgeIntensityInput = document.getElementById('edgeIntensity');
+    const invertEdgeColorsInput = document.getElementById('invertEdgeColors');
+    const useSharpenInput = document.getElementById('useSharpen');
+    const sharpnessInput = document.getElementById('sharpness');
+    const useThresholdInput = document.getElementById('useThreshold');
+    const thresholdOffsetInput = document.getElementById('thresholdOffset');
     const contrastInput = document.getElementById('contrast');
     const brightnessInput = document.getElementById('brightness');
+    const saturationInput = document.getElementById('saturation');
+    const hueInput = document.getElementById('hue');
+    const grayscaleInput = document.getElementById('grayscale');
+    const sepiaInput = document.getElementById('sepia');
     const invertInput = document.getElementById('invert');
-    const charsetInput = document.getElementById('charset');
-    const downloadBtn = document.getElementById('downloadBtn');
+    const fontSizeSlider = document.getElementById('fontSizeSlider');
 
-    let currentAscii = '';
+    // Labels
+    const valWidth = document.getElementById('valWidth');
+    const valHeight = document.getElementById('valHeight');
+    const valFontAspectRatio = document.getElementById('valFontAspectRatio');
+    const valLineHeight = document.getElementById('valLineHeight');
+    const valFrame = document.getElementById('valFrame');
+    const valSpaceDensity = document.getElementById('valSpaceDensity');
+    const valEdge = document.getElementById('valEdge');
+    const valSharpen = document.getElementById('valSharpen');
+    const valThreshold = document.getElementById('valThreshold');
+    const valContrast = document.getElementById('valContrast');
+    const valBrightness = document.getElementById('valBrightness');
+    const valSaturation = document.getElementById('valSaturation');
+    const valHue = document.getElementById('valHue');
+    const valGrayscale = document.getElementById('valGrayscale');
+    const valSepia = document.getElementById('valSepia');
+    const valFontSize = document.getElementById('valFontSize');
 
-    // Initialize with default image
-    window.addEventListener('load', () => {
-      convertImage(profileImage);
-    });
+    // Action Buttons
+    const btnCopy = document.getElementById('btnCopy');
+    const btnDownloadTxt = document.getElementById('btnDownloadTxt');
+    const btnDownloadPng = document.getElementById('btnDownloadPng');
+    const btnReset = document.getElementById('btnReset');
 
-    async function convertImage(source) {
+    // Load initial sample image
+    loadedImage.crossOrigin = 'Anonymous';
+    loadedImage.onload = () => {
+      drawPreview();
+      render();
+    };
+    loadedImage.src = 'profile.png';
+
+    function drawPreview() {
+      const pctx = previewCanvas.getContext('2d');
+      previewCanvas.width = loadedImage.width;
+      previewCanvas.height = loadedImage.height;
+      pctx.drawImage(loadedImage, 0, 0);
+    }
+
+    async function render() {
+      if (!loadedImage.complete || !loadedImage.width) return;
+
+      const isLocked = preserveAspectRatioInput.checked;
+      const charsetVal = charsetSelect.value === 'custom' ? customCharset.value : charsetSelect.value;
+      const opts = {
+        width: parseInt(widthInput.value, 10),
+        height: isLocked ? undefined : parseInt(heightInput.value, 10),
+        preserveAspectRatio: isLocked,
+        fontAspectRatio: parseFloat(fontAspectRatioInput.value),
+        transparentFrame: parseInt(transparentFrameInput.value, 10),
+        dithering: ditheringInput.value,
+        charset: charsetVal,
+        colorMode: colorModeInput.value,
+        spaceDensity: parseInt(spaceDensityInput.value, 10),
+        contrast: parseFloat(contrastInput.value),
+        brightness: parseFloat(brightnessInput.value),
+        saturation: parseFloat(saturationInput.value),
+        hue: parseFloat(hueInput.value),
+        grayscale: parseFloat(grayscaleInput.value),
+        sepia: parseFloat(sepiaInput.value),
+        invert: invertInput.checked,
+        useEdgeDetection: useEdgeDetectionInput.checked,
+        edgeIntensity: parseFloat(edgeIntensityInput.value),
+        invertEdgeColors: invertEdgeColorsInput.checked,
+        useSharpen: useSharpenInput.checked,
+        sharpness: parseFloat(sharpnessInput.value),
+        useThreshold: useThresholdInput.checked,
+        thresholdOffset: parseInt(thresholdOffsetInput.value, 10),
+        backgroundColor: '#000000',
+        textColor: '#ffffff'
+      };
+
       try {
-        const width = parseInt(widthInput.value) || 100;
-        const contrast = parseFloat(contrastInput.value);
-        const brightness = parseFloat(brightnessInput.value);
-        const invert = invertInput.checked;
-        const charset = charsetInput.value;
+        const startTime = performance.now();
+        currentResult = await hexpic.fromImageElement(loadedImage, opts);
+        const elapsed = (performance.now() - startTime).toFixed(1);
 
-        hexpic.setOptions({
-          width,
-          height: width, // Keep it roughly square for the container, but aspect ratio will override
-          preserveAspectRatio: true,
-          contrast,
-          brightness,
-          invert,
-          charset
-        });
-
-        let result;
-        if (source instanceof File) {
-          result = await hexpic.fromFile(source);
-        } else {
-          result = await hexpic.fromImageElement(source);
+        if (isLocked) {
+          heightInput.value = currentResult.height;
+          valHeight.textContent = currentResult.height;
         }
 
-        currentAscii = result.ascii;
-        asciiOutput.textContent = result.ascii;
+        if (opts.colorMode === 'color') {
+          asciiDisplay.innerHTML = currentResult.html;
+        } else {
+          asciiDisplay.textContent = currentResult.ascii;
+        }
 
-        // Adjust font size based on width to fit container
-        // Container is 400px wide
-        // Font width is roughly 0.6em usually? 
-        // Let's try to fit 'width' characters into 400px
-        const charWidth = 400 / result.width;
-        // Monospace font aspect ratio is usually around 0.6
-        const fontSize = charWidth / 0.6;
-        asciiOutput.style.fontSize = `${fontSize}px`;
-        asciiOutput.style.lineHeight = `${fontSize}px`;
-
-        downloadBtn.disabled = false;
+        asciiDisplay.style.lineHeight = `${lineHeightSlider.value}em`;
+        outputStatus.textContent = `${currentResult.width}×${currentResult.height} chars | Rendered in ${elapsed}ms`;
       } catch (err) {
-        console.error(err);
+        console.error('Render error:', err);
+        outputStatus.textContent = `Error: ${err.message}`;
       }
     }
 
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          profileImage.src = e.target.result;
-          // Wait for image to load before converting
-          profileImage.onload = () => convertImage(file);
-        };
-        reader.readAsDataURL(file);
+    // Event listeners
+    widthInput.addEventListener('input', () => { valWidth.textContent = widthInput.value; render(); });
+    preserveAspectRatioInput.addEventListener('change', () => {
+      heightGroup.style.display = preserveAspectRatioInput.checked ? 'none' : 'block';
+      render();
+    });
+    heightInput.addEventListener('input', () => {
+      valHeight.textContent = heightInput.value;
+      render();
+    });
+    fontAspectRatioInput.addEventListener('input', () => {
+      valFontAspectRatio.textContent = fontAspectRatioInput.value;
+      render();
+    });
+    lineHeightSlider.addEventListener('input', () => {
+      valLineHeight.textContent = `${lineHeightSlider.value}em`;
+      asciiDisplay.style.lineHeight = `${lineHeightSlider.value}em`;
+    });
+    transparentFrameInput.addEventListener('input', () => {
+      valFrame.textContent = `${transparentFrameInput.value}px`;
+      render();
+    });
+    spaceDensityInput.addEventListener('input', () => { valSpaceDensity.textContent = spaceDensityInput.value; render(); });
+    contrastInput.addEventListener('input', () => { valContrast.textContent = `${contrastInput.value}%`; render(); });
+    brightnessInput.addEventListener('input', () => { valBrightness.textContent = `${brightnessInput.value}%`; render(); });
+    saturationInput.addEventListener('input', () => { valSaturation.textContent = `${saturationInput.value}%`; render(); });
+    hueInput.addEventListener('input', () => { valHue.textContent = `${hueInput.value}°`; render(); });
+    grayscaleInput.addEventListener('input', () => { valGrayscale.textContent = `${grayscaleInput.value}%`; render(); });
+    sepiaInput.addEventListener('input', () => { valSepia.textContent = `${sepiaInput.value}%`; render(); });
+    ditheringInput.addEventListener('change', render);
+    colorModeInput.addEventListener('change', render);
+    invertInput.addEventListener('change', render);
+
+    charsetSelect.addEventListener('change', () => {
+      customCharset.style.display = charsetSelect.value === 'custom' ? 'block' : 'none';
+      render();
+    });
+    customCharset.addEventListener('input', render);
+
+    useEdgeDetectionInput.addEventListener('change', () => {
+      document.getElementById('edgeControls').style.display = useEdgeDetectionInput.checked ? 'block' : 'none';
+      render();
+    });
+    edgeIntensityInput.addEventListener('input', () => {
+      valEdge.textContent = edgeIntensityInput.value;
+      render();
+    });
+    invertEdgeColorsInput.addEventListener('change', render);
+
+    useSharpenInput.addEventListener('change', () => {
+      document.getElementById('sharpenControls').style.display = useSharpenInput.checked ? 'block' : 'none';
+      render();
+    });
+    sharpnessInput.addEventListener('input', () => {
+      valSharpen.textContent = sharpnessInput.value;
+      render();
+    });
+
+    useThresholdInput.addEventListener('change', () => {
+      document.getElementById('thresholdControls').style.display = useThresholdInput.checked ? 'block' : 'none';
+      render();
+    });
+    thresholdOffsetInput.addEventListener('input', () => {
+      valThreshold.textContent = thresholdOffsetInput.value;
+      render();
+    });
+
+    fontSizeSlider.addEventListener('input', () => {
+      valFontSize.textContent = `${fontSizeSlider.value}px`;
+      asciiDisplay.style.fontSize = `${fontSizeSlider.value}px`;
+      asciiDisplay.style.lineHeight = `${(parseFloat(fontSizeSlider.value) * parseFloat(lineHeightSlider.value))}px`;
+    });
+
+    // Interactive Mouse Resize Dragging Logic
+    let isDraggingHandle = false;
+    let dragMode = '';
+    let startX = 0;
+    let startY = 0;
+    let startWidthVal = 100;
+    let startHeightVal = 55;
+    let rafId = null;
+
+    function initHandle(handle, mode) {
+      handle.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isDraggingHandle = true;
+        dragMode = mode;
+        startX = e.clientX;
+        startY = e.clientY;
+        startWidthVal = parseInt(widthInput.value, 10);
+        startHeightVal = (currentResult && currentResult.height) ? currentResult.height : (parseInt(heightInput.value, 10) || 55);
+
+        // Right and bottom edge handles stretch only their dimension; unlock aspect ratio immediately
+        if (mode === 'r' || mode === 'b') {
+          preserveAspectRatioInput.checked = false;
+          heightGroup.style.display = 'block';
+          heightInput.value = startHeightVal;
+          valHeight.textContent = startHeightVal;
+        }
+
+        handle.classList.add('active');
+        resizableWrapper.classList.add('resizing');
+        dragDimensionsTag.style.display = 'block';
+        dragDimensionsTag.textContent = `${widthInput.value} cols × ${heightInput.value} rows`;
+
+        document.addEventListener('mousemove', onHandleMouseMove);
+        document.addEventListener('mouseup', onHandleMouseUp);
+      });
+    }
+
+    initHandle(handleBR, 'br');
+    initHandle(handleR, 'r');
+    initHandle(handleB, 'b');
+
+    function onHandleMouseMove(e) {
+      if (!isDraggingHandle) return;
+
+      const fontSize = parseFloat(fontSizeSlider.value) || 9;
+      const charW = fontSize * 0.60;
+      const charH = fontSize * parseFloat(lineHeightSlider.value);
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (dragMode === 'r') {
+        const deltaCols = Math.round(dx / charW);
+        const newCols = Math.max(20, Math.min(250, startWidthVal + deltaCols));
+        widthInput.value = newCols;
+        valWidth.textContent = newCols;
+        heightInput.value = startHeightVal;
+        valHeight.textContent = startHeightVal;
+      } else if (dragMode === 'b') {
+        const deltaRows = Math.round(dy / charH);
+        const newRows = Math.max(10, Math.min(200, startHeightVal + deltaRows));
+        heightInput.value = newRows;
+        valHeight.textContent = newRows;
+        widthInput.value = startWidthVal;
+        valWidth.textContent = startWidthVal;
+      } else if (dragMode === 'br') {
+        const deltaCols = Math.round(dx / charW);
+        const newCols = Math.max(20, Math.min(250, startWidthVal + deltaCols));
+        widthInput.value = newCols;
+        valWidth.textContent = newCols;
+
+        if (!preserveAspectRatioInput.checked) {
+          const deltaRows = Math.round(dy / charH);
+          const newRows = Math.max(10, Math.min(200, startHeightVal + deltaRows));
+          heightInput.value = newRows;
+          valHeight.textContent = newRows;
+        }
+      }
+
+      dragDimensionsTag.textContent = `${widthInput.value} cols × ${heightInput.value} rows`;
+
+      if (rafId) cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        render();
+      });
+    }
+
+    function onHandleMouseUp() {
+      if (!isDraggingHandle) return;
+      isDraggingHandle = false;
+      document.removeEventListener('mousemove', onHandleMouseMove);
+      document.removeEventListener('mouseup', onHandleMouseUp);
+      resizableWrapper.classList.remove('resizing');
+      handleBR.classList.remove('active');
+      handleR.classList.remove('active');
+      handleB.classList.remove('active');
+      setTimeout(() => {
+        dragDimensionsTag.style.display = 'none';
+      }, 500);
+      render();
+    }
+
+    // 1-Click Fit Screen Zoom
+    btnFit.addEventListener('click', () => {
+      if (!currentResult || !currentResult.width) return;
+      const containerW = outputContainer.clientWidth - 50;
+      const containerH = outputContainer.clientHeight - 50;
+      const lineHMultiplier = parseFloat(lineHeightSlider.value) || 0.60;
+      const fitW = containerW / (currentResult.width * 0.60);
+      const fitH = containerH / (currentResult.height * lineHMultiplier);
+      const targetFontSize = Math.max(4, Math.min(18, Math.floor(Math.min(fitW, fitH))));
+      fontSizeSlider.value = targetFontSize;
+      valFontSize.textContent = `${targetFontSize}px`;
+      asciiDisplay.style.fontSize = `${targetFontSize}px`;
+      asciiDisplay.style.lineHeight = `${(targetFontSize * lineHMultiplier)}px`;
+    });
+
+    // File Drag & Drop
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
       }
     });
 
-    // Live updates
-    [widthInput, contrastInput, brightnessInput, invertInput, charsetInput].forEach(input => {
-      input.addEventListener('input', () => {
-        if (imageInput.files[0]) {
-          convertImage(imageInput.files[0]);
-        } else {
-          convertImage(profileImage);
-        }
-      });
+    function handleFile(file) {
+      if (!file) return;
+      outputStatus.textContent = 'Loading selected image...';
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          loadedImage = img;
+          drawPreview();
+          render();
+        };
+        img.onerror = (err) => {
+          console.error('Image load error:', err);
+          outputStatus.textContent = 'Error: Failed to decode image file.';
+        };
+        img.src = e.target.result;
+      };
+      reader.onerror = (err) => {
+        console.error('FileReader error:', err);
+        outputStatus.textContent = 'Error: Failed to read file.';
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Action buttons
+    btnCopy.addEventListener('click', async () => {
+      if (!currentResult) return;
+      await currentResult.copyToClipboard();
+      const originalText = btnCopy.textContent;
+      btnCopy.textContent = '✅ Copied!';
+      setTimeout(() => { btnCopy.textContent = originalText; }, 1200);
     });
 
-    downloadBtn.addEventListener('click', () => {
-      const blob = new Blob([currentAscii], { type: 'text/plain' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'hexpic-art.txt';
-      a.click();
-      URL.revokeObjectURL(url);
+    btnDownloadTxt.addEventListener('click', () => {
+      if (currentResult) currentResult.saveAsText('hexpic-art.txt');
+    });
+
+    btnDownloadPng.addEventListener('click', () => {
+      if (currentResult) currentResult.saveAsPng('hexpic-art.png', 12);
+    });
+
+    btnReset.addEventListener('click', () => {
+      widthInput.value = 100; valWidth.textContent = '100';
+      preserveAspectRatioInput.checked = true;
+      heightGroup.style.display = 'none';
+      fontAspectRatioInput.value = 0.55; valFontAspectRatio.textContent = '0.55';
+      lineHeightSlider.value = 0.60; valLineHeight.textContent = '0.60em';
+      asciiDisplay.style.lineHeight = '0.60em';
+      transparentFrameInput.value = 0; valFrame.textContent = '0px';
+      spaceDensityInput.value = 1; valSpaceDensity.textContent = '1';
+      contrastInput.value = 100; valContrast.textContent = '100%';
+      brightnessInput.value = 100; valBrightness.textContent = '100%';
+      saturationInput.value = 100; valSaturation.textContent = '100%';
+      hueInput.value = 0; valHue.textContent = '0°';
+      grayscaleInput.value = 0; valGrayscale.textContent = '0%';
+      sepiaInput.value = 0; valSepia.textContent = '0%';
+      ditheringInput.value = 'atkinson';
+      charsetSelect.value = 'normal';
+      colorModeInput.value = 'monochrome';
+      invertInput.checked = false;
+      useEdgeDetectionInput.checked = false;
+      invertEdgeColorsInput.checked = true;
+      document.getElementById('edgeControls').style.display = 'none';
+      useSharpenInput.checked = false;
+      document.getElementById('sharpenControls').style.display = 'none';
+      useThresholdInput.checked = false;
+      document.getElementById('thresholdControls').style.display = 'none';
+      render();
     });
   </script>
 </body>
-
 </html>

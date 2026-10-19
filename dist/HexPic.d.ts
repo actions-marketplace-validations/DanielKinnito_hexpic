@@ -1,6 +1,6 @@
 import { AsciiArtOptions, AsciiArtResult } from './types';
 /**
- * Main class for converting images to ASCII art
+ * Main engine for converting images to studio-quality ASCII art
  */
 export declare class HexPic {
     private options;
@@ -12,33 +12,33 @@ export declare class HexPic {
      */
     constructor(options?: AsciiArtOptions);
     /**
-     * Updates the options for ASCII art generation
-     * @param options New options to merge with existing ones
+     * Updates options for ASCII art generation
      */
     setOptions(options: AsciiArtOptions): void;
     /**
-     * Converts an image element to ASCII art
-     * @param image The image element to convert
-     * @returns A promise that resolves to the ASCII art result
+     * Gets a copy of the current configuration options
+     */
+    getOptions(): Required<AsciiArtOptions>;
+    /**
+     * Converts an HTMLImageElement to ASCII art
      */
     fromImageElement(image: HTMLImageElement, options?: AsciiArtOptions): Promise<AsciiArtResult>;
     /**
      * Converts an image URL to ASCII art
-     * @param url The URL of the image to convert
-     * @returns A promise that resolves to the ASCII art result
      */
-    fromUrl(url: string): Promise<AsciiArtResult>;
+    fromUrl(url: string, options?: AsciiArtOptions): Promise<AsciiArtResult>;
     /**
-     * Converts a file to ASCII art
-     * @param file The image file to convert
-     * @returns A promise that resolves to the ASCII art result
+     * Converts a File object to ASCII art
      */
-    fromFile(file: File): Promise<AsciiArtResult>;
+    fromFile(file: File, options?: AsciiArtOptions): Promise<AsciiArtResult>;
     /**
-     * Internal method to handle the image conversion
-     * @param image The image to convert
-     * @private
+     * Automatically scans the DOM for elements with data-hexpic and renders ASCII art into them.
+     */
+    static init(selector?: string): Promise<void>;
+    /**
+     * Internal processing pipeline: Pre-filtering -> Spatial Convolution -> Dithering -> ASCII Quantization
      */
     private convertImage;
 }
+export default HexPic;
 //# sourceMappingURL=HexPic.d.ts.map
