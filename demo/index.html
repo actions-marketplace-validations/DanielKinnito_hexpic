@@ -3,323 +3,351 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HEXPIC // RETRO IMAGE TO ASCII WORKSTATION</title>
+  <title>HexPic - Image to ASCII Converter</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <!-- System Top Bar -->
-    <header class="sys-header">
-      <div class="sys-title">
-        <span>HEXPIC // SYSTEM</span>
-        <span class="sys-tag">v0.2.0-STATION</span>
-      </div>
-      <nav class="sys-nav">
-        <a href="#studio">[ TERMINAL ]</a>
-        <a href="#manual">[ MANUAL ]</a>
-        <a href="https://github.com/DanielKinnito/hexpic" target="_blank" rel="noopener">[ REPO ]</a>
-      </nav>
-    </header>
-
-    <!-- ASCII Title & System Info Banner -->
-    <div class="ascii-banner-box">
-      <pre class="ascii-logo">
- _  _ _____ _  _ ___ ___ ___ 
-| || | ____\ \/ | _ \_ _/ __|
-| __ |  _|  >  <|  _/| | (__ 
-|_||_|_____/_/\_\_| |___\___| v0.2.0</pre>
-      <div class="banner-desc">
-        <div><strong>IMAGE TO ASCII CONVERSION PROCESSOR</strong></div>
-        <div style="margin-top: 0.25rem;">Direct client-side canvas rasterization with error diffusion dithering (Atkinson, Floyd-Steinberg, JJN, Stucki), Sobel edge convolution, and 24-bit TrueColor monospace mapping.</div>
-      </div>
-    </div>
-
-    <!-- Workspace Grid -->
-    <div class="workspace-grid" id="studio">
-      <!-- Left: Parameter Controls -->
-      <aside class="panel">
-        <div class="panel-bar">
-          <span>// INPUT BITMAP & MATRIX CONFIG</span>
-          <button id="btnReset" class="btn-retro" style="padding: 0.15rem 0.5rem; font-size: 0.72rem;">[ RESET ALL ]</button>
+  <div class="desktop-container">
+    <!-- Main Application Window -->
+    <div class="window" id="mainAppWindow">
+      <!-- Title Bar -->
+      <div class="title-bar">
+        <div class="title-bar-text">
+          <span class="title-bar-icon">HP</span>
+          <span>HexPic - Image to ASCII Converter</span>
         </div>
+        <div class="title-bar-controls">
+          <button class="title-bar-btn" aria-label="Minimize">_</button>
+          <button class="title-bar-btn" aria-label="Maximize">□</button>
+          <button class="title-bar-btn" aria-label="Close">✕</button>
+        </div>
+      </div>
 
-        <div class="panel-body">
-          <!-- Drop & File Ingest -->
-          <div class="drop-zone" id="dropZone" role="button" tabindex="0">
-            <div class="drop-title">[+] INGEST SOURCE BITMAP</div>
-            <div class="drop-sub">DROP FILE HERE OR CLICK TO BROWSE (PNG, JPG, WEBP, SVG)</div>
-            <button type="button" id="btnChooseFile" class="btn-retro btn-accent" style="font-size: 0.75rem;">[ CHOOSE FILE ]</button>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;">
-          </div>
+      <!-- Menu Bar -->
+      <div class="menu-bar">
+        <div class="menu-item"><u>F</u>ile</div>
+        <div class="menu-item"><u>E</u>dit</div>
+        <div class="menu-item"><u>V</u>iew</div>
+        <div class="menu-item"><u>O</u>ptions</div>
+        <div class="menu-item" onclick="document.getElementById('docWindow').scrollIntoView({behavior: 'smooth'})"><u>H</u>elp</div>
+      </div>
 
-          <!-- Thumbnail Well -->
-          <div class="thumb-well">
-            <canvas id="previewCanvas"></canvas>
-          </div>
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <button id="btnChooseFile" class="btn-win">Open Image...</button>
+        <button id="btnCopy" class="btn-win">Copy Text</button>
+        <button id="btnDownloadTxt" class="btn-win">Save .TXT</button>
+        <button id="btnDownloadPng" class="btn-win">Save .PNG</button>
+        <div class="toolbar-separator"></div>
+        <button id="btnReset" class="btn-win">Reset Defaults</button>
+        <input type="file" id="fileInput" accept="image/*" style="display: none;">
+      </div>
 
-          <!-- Section: Dithering & Palettes -->
-          <div class="control-block">
-            <div class="block-label">// QUANTIZATION & DITHERING</div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="dithering">Diffusion Routine</label>
+      <!-- Main Window Body -->
+      <div class="window-body">
+        <div class="workspace-panes">
+          <!-- Left Column: Settings Dialog -->
+          <div class="config-pane">
+            <!-- Source Image Box -->
+            <fieldset class="win-group">
+              <legend class="win-legend">Source Image</legend>
+              <div class="drop-box" id="dropZone" role="button" tabindex="0">
+                <div style="font-weight: bold; margin-bottom: 2px;">Click to select image file</div>
+                <div style="color: #606060; font-size: 10px;">or drag and drop here (PNG, JPG, WebP, SVG)</div>
               </div>
-              <select id="dithering" class="retro-select">
-                <option value="none">None (Direct Cutoff)</option>
-                <option value="atkinson" selected>Atkinson (Classic Mac / Retro Stipple)</option>
-                <option value="floyd-steinberg">Floyd-Steinberg</option>
-                <option value="jjn">Jarvis, Judice & Ninke (JJN)</option>
-                <option value="stucki">Stucki Dithering</option>
-              </select>
-            </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="charsetSelect">Character Gradient</label>
+              <div class="preview-box">
+                <canvas id="previewCanvas"></canvas>
               </div>
-              <select id="charsetSelect" class="retro-select">
-                <option value="normal" selected>Normal (@%#*+=-:.)</option>
-                <option value="normal2">Normal 2 (&$Xx+;:.)</option>
-                <option value="blockelement">Block Elements (█▀▄▌▐░▒▓)</option>
-                <option value="codepage437">Code Page 437 (█▓▒░)</option>
-                <option value="minimalist">Minimalist (#+-.)</option>
-                <option value="grayscale">Extended Grayscale</option>
-                <option value="alphanumeric">Alphanumeric</option>
-                <option value="math">Mathematics (+-×÷=≠≈∞√π)</option>
-                <option value="braille">Braille (⣿⣶⣤⣀)</option>
-                <option value="max">Max Density Matrix</option>
-                <option value="custom">Custom Charset...</option>
-              </select>
-              <input type="text" id="customCharset" class="retro-text" placeholder="Custom charset (darkest to lightest)" style="display: none; margin-top: 0.4rem;">
-            </div>
+            </fieldset>
 
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="colorMode">Color Mode</label>
+            <!-- Dithering & Palette Box -->
+            <fieldset class="win-group">
+              <legend class="win-legend">Dithering & Palette</legend>
+              <div class="field-row-stacked">
+                <label for="dithering" style="display: block; margin-bottom: 2px;">Dithering Algorithm:</label>
+                <select id="dithering" class="win-select">
+                  <option value="none">None (Posterized)</option>
+                  <option value="atkinson" selected>Atkinson (Classic Mac Dithering)</option>
+                  <option value="floyd-steinberg">Floyd-Steinberg</option>
+                  <option value="jjn">Jarvis, Judice & Ninke (JJN)</option>
+                  <option value="stucki">Stucki</option>
+                </select>
               </div>
-              <select id="colorMode" class="retro-select">
-                <option value="monochrome" selected>Monochrome (Plain ASCII)</option>
-                <option value="color">TrueColor (24-bit HTML Spans)</option>
-              </select>
-            </div>
 
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="spaceDensity">Negative Space Padding</label>
-                <span class="val-tag" id="valSpaceDensity">1</span>
+              <div class="field-row-stacked">
+                <label for="charsetSelect" style="display: block; margin-bottom: 2px;">Character Set:</label>
+                <select id="charsetSelect" class="win-select">
+                  <option value="normal" selected>Normal (@%#*+=-:.)</option>
+                  <option value="normal2">Normal 2 (&$Xx+;:.)</option>
+                  <option value="blockelement">Block Elements (█▀▄▌▐░▒▓)</option>
+                  <option value="codepage437">Code Page 437 (█▓▒░)</option>
+                  <option value="minimalist">Minimalist (#+-.)</option>
+                  <option value="grayscale">Extended Grayscale</option>
+                  <option value="alphanumeric">Alphanumeric</option>
+                  <option value="math">Mathematics (+-×÷=≠≈∞√π)</option>
+                  <option value="braille">Braille (⣿⣶⣤⣀)</option>
+                  <option value="max">Max Density Matrix</option>
+                  <option value="custom">Custom Character Set...</option>
+                </select>
+                <input type="text" id="customCharset" class="win-input" placeholder="Darkest to lightest characters" style="display: none; margin-top: 3px;">
               </div>
-              <input type="range" id="spaceDensity" class="retro-range" min="0" max="15" value="1">
-            </div>
-          </div>
 
-          <!-- Section: Dimensions & Aspect -->
-          <div class="control-block">
-            <div class="block-label">// DIMENSIONS & MONOSPACE SCALING</div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="width">Columns (Characters)</label>
-                <span class="val-tag" id="valWidth">100</span>
+              <div class="field-row-stacked">
+                <label for="colorMode" style="display: block; margin-bottom: 2px;">Color Mode:</label>
+                <select id="colorMode" class="win-select">
+                  <option value="monochrome" selected>Monochrome (Plain ASCII)</option>
+                  <option value="color">Full Color (TrueColor 24-bit HTML)</option>
+                </select>
               </div>
-              <input type="range" id="width" class="retro-range" min="20" max="250" value="100">
-            </div>
 
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="preserveAspectRatio" checked>
-                <span>Lock Source Aspect Ratio</span>
-              </label>
-            </div>
-
-            <div class="field-group" id="heightGroup" style="display: none;">
-              <div class="field-label-row">
-                <label for="height">Custom Rows</label>
-                <span class="val-tag" id="valHeight">55</span>
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="spaceDensity">Negative Space Padding:</label>
+                  <span class="field-badge" id="valSpaceDensity">1</span>
+                </div>
+                <input type="range" id="spaceDensity" class="win-slider" min="0" max="15" value="1">
               </div>
-              <input type="range" id="height" class="retro-range" min="10" max="200" value="55">
-            </div>
+            </fieldset>
 
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="fontAspectRatio">Aspect Correction (Width/Height)</label>
-                <span class="val-tag" id="valFontAspectRatio">0.55</span>
+            <!-- Dimensions & Aspect Ratio -->
+            <fieldset class="win-group">
+              <legend class="win-legend">Dimensions & Aspect Ratio</legend>
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="width">Width (Characters):</label>
+                  <span class="field-badge" id="valWidth">100</span>
+                </div>
+                <input type="range" id="width" class="win-slider" min="20" max="250" value="100">
               </div>
-              <input type="range" id="fontAspectRatio" class="retro-range" min="0.25" max="1.50" step="0.05" value="0.55">
-            </div>
 
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="lineHeightSlider">Line Spacing Packing</label>
-                <span class="val-tag" id="valLineHeight">0.60em</span>
-              </div>
-              <input type="range" id="lineHeightSlider" class="retro-range" min="0.30" max="1.20" step="0.05" value="0.60">
-            </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="transparentFrame">Border Frame Padding</label>
-                <span class="val-tag" id="valFrame">0px</span>
-              </div>
-              <input type="range" id="transparentFrame" class="retro-range" min="0" max="20" value="0">
-            </div>
-          </div>
-
-          <!-- Section: Convolutions & Filters -->
-          <div class="control-block">
-            <div class="block-label">// CONVOLUTION FILTERS</div>
-
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="useEdgeDetection">
-                <span>3x3 Sobel Edge Detection</span>
-              </label>
-              <span class="val-tag" id="valEdge">1.0</span>
-            </div>
-            <div class="field-group" id="edgeControls" style="display: none;">
-              <input type="range" id="edgeIntensity" class="retro-range" min="0.1" max="2.0" step="0.1" value="1.0">
-              <div class="toggle-row" style="margin-top: 0.35rem;">
-                <label class="toggle-label" style="font-size: 0.72rem; color: var(--text-muted);">
-                  <input type="checkbox" id="invertEdgeColors" checked>
-                  <span>Invert Edge Colors (Dark Lines)</span>
+              <div class="field-row" style="margin: 4px 0 6px;">
+                <label class="win-checkbox">
+                  <input type="checkbox" id="preserveAspectRatio" checked>
+                  <span>Maintain original aspect ratio</span>
                 </label>
               </div>
-            </div>
 
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="useSharpen">
-                <span>3x3 Unsharp Sharpening Kernel</span>
-              </label>
-              <span class="val-tag" id="valSharpen">9</span>
-            </div>
-            <div class="field-group" id="sharpenControls" style="display: none;">
-              <input type="range" id="sharpness" class="retro-range" min="1" max="20" step="1" value="9">
-            </div>
+              <div class="field-row-stacked" id="heightGroup" style="display: none;">
+                <div class="field-row">
+                  <label for="height">Height (Rows):</label>
+                  <span class="field-badge" id="valHeight">55</span>
+                </div>
+                <input type="range" id="height" class="win-slider" min="10" max="200" value="55">
+              </div>
 
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="useThreshold">
-                <span>Binary Luminance Thresholding</span>
-              </label>
-              <span class="val-tag" id="valThreshold">128</span>
-            </div>
-            <div class="field-group" id="thresholdControls" style="display: none;">
-              <input type="range" id="thresholdOffset" class="retro-range" min="0" max="255" value="128">
-            </div>
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="fontAspectRatio">Character Aspect (Width/Height):</label>
+                  <span class="field-badge" id="valFontAspectRatio">0.55</span>
+                </div>
+                <input type="range" id="fontAspectRatio" class="win-slider" min="0.25" max="1.50" step="0.05" value="0.55">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="lineHeightSlider">Line Spacing:</label>
+                  <span class="field-badge" id="valLineHeight">0.60em</span>
+                </div>
+                <input type="range" id="lineHeightSlider" class="win-slider" min="0.30" max="1.20" step="0.05" value="0.60">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="transparentFrame">Transparent Border Frame:</label>
+                  <span class="field-badge" id="valFrame">0px</span>
+                </div>
+                <input type="range" id="transparentFrame" class="win-slider" min="0" max="20" value="0">
+              </div>
+            </fieldset>
+
+            <!-- Edge & Detail Convolutions -->
+            <fieldset class="win-group">
+              <legend class="win-legend">Edge & Detail Enhancement</legend>
+              <div class="field-row">
+                <label class="win-checkbox">
+                  <input type="checkbox" id="useEdgeDetection">
+                  <span>Sobel Edge Detection</span>
+                </label>
+                <span class="field-badge" id="valEdge">1.0</span>
+              </div>
+              <div id="edgeControls" style="display: none; margin-bottom: 6px;">
+                <input type="range" id="edgeIntensity" class="win-slider" min="0.1" max="2.0" step="0.1" value="1.0">
+                <div style="margin-top: 2px;">
+                  <label class="win-checkbox">
+                    <input type="checkbox" id="invertEdgeColors" checked>
+                    <span>Invert edge colors (dark lines)</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <label class="win-checkbox">
+                  <input type="checkbox" id="useSharpen">
+                  <span>3x3 Sharpening Filter</span>
+                </label>
+                <span class="field-badge" id="valSharpen">9</span>
+              </div>
+              <div id="sharpenControls" style="display: none; margin-bottom: 6px;">
+                <input type="range" id="sharpness" class="win-slider" min="1" max="20" step="1" value="9">
+              </div>
+
+              <div class="field-row">
+                <label class="win-checkbox">
+                  <input type="checkbox" id="useThreshold">
+                  <span>Hard Thresholding</span>
+                </label>
+                <span class="field-badge" id="valThreshold">128</span>
+              </div>
+              <div id="thresholdControls" style="display: none; margin-bottom: 6px;">
+                <input type="range" id="thresholdOffset" class="win-slider" min="0" max="255" value="128">
+              </div>
+            </fieldset>
+
+            <!-- Color & Tone Grading -->
+            <fieldset class="win-group">
+              <legend class="win-legend">Color & Tone Grading</legend>
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="contrast">Contrast:</label>
+                  <span class="field-badge" id="valContrast">100%</span>
+                </div>
+                <input type="range" id="contrast" class="win-slider" min="0" max="250" value="100">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="brightness">Brightness:</label>
+                  <span class="field-badge" id="valBrightness">100%</span>
+                </div>
+                <input type="range" id="brightness" class="win-slider" min="0" max="250" value="100">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="saturation">Saturation:</label>
+                  <span class="field-badge" id="valSaturation">100%</span>
+                </div>
+                <input type="range" id="saturation" class="win-slider" min="0" max="400" value="100">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="hue">Hue Rotation:</label>
+                  <span class="field-badge" id="valHue">0°</span>
+                </div>
+                <input type="range" id="hue" class="win-slider" min="0" max="360" value="0">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="grayscale">Grayscale Filter:</label>
+                  <span class="field-badge" id="valGrayscale">0%</span>
+                </div>
+                <input type="range" id="grayscale" class="win-slider" min="0" max="100" value="0">
+              </div>
+
+              <div class="field-row-stacked">
+                <div class="field-row">
+                  <label for="sepia">Sepia Filter:</label>
+                  <span class="field-badge" id="valSepia">0%</span>
+                </div>
+                <input type="range" id="sepia" class="win-slider" min="0" max="100" value="0">
+              </div>
+
+              <div class="field-row" style="margin-top: 4px;">
+                <label class="win-checkbox">
+                  <input type="checkbox" id="invert">
+                  <span>Invert brightness</span>
+                </label>
+              </div>
+            </fieldset>
           </div>
 
-          <!-- Section: Color Grading -->
-          <div class="control-block">
-            <div class="block-label">// COLOR & LUMINANCE GRADING</div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="contrast">Contrast</label>
-                <span class="val-tag" id="valContrast">100%</span>
+          <!-- Right Column: Live Output Monitor -->
+          <div class="output-pane">
+            <div class="output-toolbar">
+              <div style="font-weight: bold;">Preview Output:</div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <label for="fontSizeSlider" style="font-size: 11px;">Zoom:</label>
+                <input type="range" id="fontSizeSlider" class="win-slider" min="4" max="18" value="9" style="width: 60px;">
+                <span class="field-badge" id="valFontSize">9px</span>
+                <button id="btnFit" class="btn-win" style="padding: 1px 6px;">Fit Window</button>
               </div>
-              <input type="range" id="contrast" class="retro-range" min="0" max="250" value="100">
             </div>
 
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="brightness">Brightness</label>
-                <span class="val-tag" id="valBrightness">100%</span>
+            <div class="ascii-screen-container" id="outputContainer">
+              <div class="resizable-wrapper" id="resizableWrapper" title="Drag edges or bottom-right corner to resize output">
+                <div id="asciiDisplay"></div>
+                <div class="resize-grip grip-corner" id="handleBR" title="Drag corner to resize Width & Height"></div>
+                <div class="resize-grip grip-right" id="handleR" title="Drag right edge to change Width"></div>
+                <div class="resize-grip grip-bottom" id="handleB" title="Drag bottom edge to change Height"></div>
+                <div class="size-tooltip" id="dragDimensionsTag">100 × 55 chars</div>
               </div>
-              <input type="range" id="brightness" class="retro-range" min="0" max="250" value="100">
             </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="saturation">Saturation</label>
-                <span class="val-tag" id="valSaturation">100%</span>
-              </div>
-              <input type="range" id="saturation" class="retro-range" min="0" max="400" value="100">
-            </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="hue">Hue Rotation</label>
-                <span class="val-tag" id="valHue">0°</span>
-              </div>
-              <input type="range" id="hue" class="retro-range" min="0" max="360" value="0">
-            </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="grayscale">Grayscale</label>
-                <span class="val-tag" id="valGrayscale">0%</span>
-              </div>
-              <input type="range" id="grayscale" class="retro-range" min="0" max="100" value="0">
-            </div>
-
-            <div class="field-group">
-              <div class="field-label-row">
-                <label for="sepia">Sepia</label>
-                <span class="val-tag" id="valSepia">0%</span>
-              </div>
-              <input type="range" id="sepia" class="retro-range" min="0" max="100" value="0">
-            </div>
-
-            <div class="toggle-row">
-              <label class="toggle-label">
-                <input type="checkbox" id="invert">
-                <span>Invert Luminance Map</span>
-              </label>
-            </div>
-          </div>
-
-          <!-- Section: Action Buttons -->
-          <div class="action-bar-grid">
-            <button id="btnCopy" class="btn-retro btn-accent">[ COPY BUFFER ]</button>
-            <button id="btnDownloadTxt" class="btn-retro">[ SAVE .TXT ]</button>
-            <button id="btnDownloadPng" class="btn-retro btn-amber" style="grid-column: 1 / -1;">[ EXPORT CANVAS PNG ]</button>
           </div>
         </div>
-      </aside>
+      </div>
 
-      <!-- Right: Sticky Live Monitor -->
-      <main class="output-monitor">
-        <div class="monitor-header">
-          <div class="monitor-status" id="outputStatus">// BUFFER: INITIALIZING...</div>
-          <div class="monitor-tools">
-            <label style="font-size: 0.72rem; color: var(--text-muted);">ZOOM:</label>
-            <input type="range" id="fontSizeSlider" class="retro-range" min="4" max="18" value="9" style="width: 65px; margin: 0;">
-            <span class="val-tag" id="valFontSize" style="font-size: 0.7rem;">9px</span>
-            <button id="btnFit" class="btn-retro" style="padding: 0.15rem 0.45rem; font-size: 0.7rem;">[ FIT SCREEN ]</button>
-          </div>
-        </div>
-
-        <div class="monitor-body" id="outputContainer">
-          <div class="viewport-frame" id="resizableWrapper" title="Drag edges or bottom-right corner to resize dimensions">
-            <div id="asciiDisplay"></div>
-            <div class="drag-grip grip-br" id="handleBR" title="Drag corner to resize Width & Height"></div>
-            <div class="drag-grip grip-r" id="handleR" title="Drag edge to stretch Width"></div>
-            <div class="drag-grip grip-b" id="handleB" title="Drag edge to stretch Height"></div>
-            <div class="dimensions-badge" id="dragDimensionsTag">100 × 55 CHARS</div>
-          </div>
-        </div>
-      </main>
+      <!-- Classic Windows Status Bar -->
+      <div class="status-bar">
+        <div class="status-panel flex-main" id="outputStatus">Ready</div>
+        <div class="status-panel" id="statusDims">100 × 55 characters</div>
+        <div class="status-panel" id="statusDither">Atkinson Dither</div>
+        <div class="status-panel">HexPic v0.2.0</div>
+      </div>
     </div>
 
-    <!-- Technical Manual Section -->
-    <section class="man-page" id="manual">
-      <div class="man-title">MANUAL PAGE: HEXPIC(1) -- DROP-IN INTEGRATION</div>
-      <div class="man-sub">Include the standalone bundle or install via npm to convert images in pure client-side JavaScript:</div>
-
-      <div class="code-terminal">
-<span class="code-comment">&lt;!-- 1. Include UMD bundle --&gt;</span>
-&lt;<span class="code-tag">script</span> <span class="code-keyword">src</span>=<span class="code-comment">"https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"</span>&gt;&lt;/<span class="code-tag">script</span>&gt;
-
-<span class="code-comment">&lt;!-- 2. Declarative image tag --&gt;</span>
-&lt;<span class="code-tag">img</span> <span class="code-keyword">src</span>=<span class="code-comment">"portrait.png"</span> <span class="code-keyword">data-hexpic</span> <span class="code-keyword">data-hexpic-width</span>=<span class="code-comment">"100"</span> <span class="code-keyword">data-hexpic-dithering</span>=<span class="code-comment">"atkinson"</span> /&gt;
-
-<span class="code-comment">&lt;!-- 3. Execute conversion on DOM ready --&gt;</span>
-&lt;<span class="code-tag">script</span>&gt;
-  HexPic.init();
-&lt;/<span class="code-tag">script</span>&gt;
+    <!-- Documentation & Developer Guide Window -->
+    <div class="window" id="docWindow">
+      <div class="title-bar">
+        <div class="title-bar-text">
+          <span class="title-bar-icon">?</span>
+          <span>HexPic Developer Documentation - Quick Start</span>
+        </div>
+        <div class="title-bar-controls">
+          <button class="title-bar-btn" aria-label="Minimize">_</button>
+          <button class="title-bar-btn" aria-label="Maximize">□</button>
+        </div>
       </div>
-    </section>
+
+      <div class="doc-content">
+        <h2>Integration Guide</h2>
+        <p>HexPic can be used as a drop-in HTML plugin or imported as an ES module in modern frameworks like React, Next.js, and Vite.</p>
+
+        <h3 style="font-size: 12px; margin: 8px 0 4px;">1. Declarative HTML Plugin</h3>
+        <p style="margin: 0 0 4px;">Add <code>data-hexpic</code> to any image element and call <code>HexPic.init()</code>:</p>
+        <div class="doc-code">
+&lt;script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"&gt;&lt;/script&gt;
+
+&lt;img src="avatar.png" data-hexpic data-hexpic-width="100" data-hexpic-dithering="atkinson" /&gt;
+
+&lt;script&gt;
+  HexPic.init();
+&lt;/script&gt;
+        </div>
+
+        <h3 style="font-size: 12px; margin: 8px 0 4px;">2. TypeScript & Modern Frameworks</h3>
+        <p style="margin: 0 0 4px;">Install via npm and import the engine or React components:</p>
+        <div class="doc-code">
+import HexPic from 'hexpic';
+
+const converter = new HexPic({
+  width: 100,
+  dithering: 'atkinson',
+  charset: 'blockelement',
+  colorMode: 'color'
+});
+
+const result = await converter.fromUrl('/avatar.png');
+console.log(result.ascii);
+document.getElementById('art').innerHTML = result.html;
+        </div>
+
+        <p style="margin-top: 8px; color: #606060; font-size: 11px;">
+          Source repository: <a href="https://github.com/DanielKinnito/hexpic" target="_blank" rel="noopener" style="color: #000080;">https://github.com/DanielKinnito/hexpic</a> | MIT License
+        </p>
+      </div>
+    </div>
   </div>
 
   <script src="./dist/index.umd.js"></script>
@@ -336,6 +364,8 @@
     const previewCanvas = document.getElementById('previewCanvas');
     const asciiDisplay = document.getElementById('asciiDisplay');
     const outputStatus = document.getElementById('outputStatus');
+    const statusDims = document.getElementById('statusDims');
+    const statusDither = document.getElementById('statusDither');
     const outputContainer = document.getElementById('outputContainer');
     const resizableWrapper = document.getElementById('resizableWrapper');
     const handleBR = document.getElementById('handleBR');
@@ -415,7 +445,7 @@
     async function render() {
       if (!loadedImage.complete || !loadedImage.width) return;
       if (!hexpic) {
-        outputStatus.textContent = '// ERROR: HexPic engine not initialized';
+        outputStatus.textContent = 'Error: HexPic engine not initialized';
         return;
       }
 
@@ -466,10 +496,12 @@
         }
 
         asciiDisplay.style.lineHeight = `${lineHeightSlider.value}em`;
-        outputStatus.textContent = `// BUFFER: ${currentResult.width}×${currentResult.height} CHARS | ${elapsed}ms`;
+        outputStatus.textContent = `Rendered in ${elapsed} ms`;
+        statusDims.textContent = `${currentResult.width} × ${currentResult.height} characters`;
+        statusDither.textContent = `${opts.dithering.charAt(0).toUpperCase() + opts.dithering.slice(1)} Dither`;
       } catch (err) {
         console.error('Render error:', err);
-        outputStatus.textContent = `// ERROR: ${err.message}`;
+        outputStatus.textContent = `Error: ${err.message}`;
       }
     }
 
@@ -546,7 +578,7 @@
       asciiDisplay.style.lineHeight = `${(parseFloat(fontSizeSlider.value) * parseFloat(lineHeightSlider.value))}px`;
     });
 
-    // Interactive Drag Resize Logic
+    // Window-Style Drag Resize Logic
     let isDraggingHandle = false;
     let dragMode = '';
     let startX = 0;
@@ -573,10 +605,9 @@
           valHeight.textContent = startHeightVal;
         }
 
-        handle.classList.add('active');
         resizableWrapper.classList.add('resizing');
         dragDimensionsTag.style.display = 'block';
-        dragDimensionsTag.textContent = `${widthInput.value} COLS × ${heightInput.value} ROWS`;
+        dragDimensionsTag.textContent = `${widthInput.value} × ${heightInput.value} chars`;
 
         document.addEventListener('mousemove', onHandleMouseMove);
         document.addEventListener('mouseup', onHandleMouseUp);
@@ -625,7 +656,7 @@
         }
       }
 
-      dragDimensionsTag.textContent = `${widthInput.value} COLS × ${heightInput.value} ROWS`;
+      dragDimensionsTag.textContent = `${widthInput.value} × ${heightInput.value} chars`;
 
       if (rafId) cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
@@ -639,9 +670,6 @@
       document.removeEventListener('mousemove', onHandleMouseMove);
       document.removeEventListener('mouseup', onHandleMouseUp);
       resizableWrapper.classList.remove('resizing');
-      handleBR.classList.remove('active');
-      handleR.classList.remove('active');
-      handleB.classList.remove('active');
       setTimeout(() => {
         dragDimensionsTag.style.display = 'none';
       }, 500);
@@ -651,8 +679,8 @@
     // Fit Viewport Zoom
     btnFit.addEventListener('click', () => {
       if (!currentResult || !currentResult.width) return;
-      const containerW = outputContainer.clientWidth - 40;
-      const containerH = outputContainer.clientHeight - 40;
+      const containerW = outputContainer.clientWidth - 30;
+      const containerH = outputContainer.clientHeight - 30;
       const lineHMultiplier = parseFloat(lineHeightSlider.value) || 0.60;
       const fitW = containerW / (currentResult.width * 0.60);
       const fitH = containerH / (currentResult.height * lineHMultiplier);
@@ -713,7 +741,7 @@
 
     function handleFile(file) {
       if (!file) return;
-      outputStatus.textContent = '// INGESTING BITMAP...';
+      outputStatus.textContent = 'Loading image...';
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
@@ -724,13 +752,13 @@
         };
         img.onerror = (err) => {
           console.error('Image decode error:', err);
-          outputStatus.textContent = '// ERROR: Failed to decode image file';
+          outputStatus.textContent = 'Error: Failed to decode image file';
         };
         img.src = e.target.result;
       };
       reader.onerror = (err) => {
         console.error('FileReader error:', err);
-        outputStatus.textContent = '// ERROR: Failed to read file';
+        outputStatus.textContent = 'Error: Failed to read file';
       };
       reader.readAsDataURL(file);
     }
@@ -740,7 +768,7 @@
       if (!currentResult) return;
       await currentResult.copyToClipboard();
       const originalText = btnCopy.textContent;
-      btnCopy.textContent = '[ COPIED ]';
+      btnCopy.textContent = 'Copied!';
       setTimeout(() => { btnCopy.textContent = originalText; }, 1200);
     });
 
