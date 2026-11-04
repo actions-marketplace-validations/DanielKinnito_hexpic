@@ -133,7 +133,7 @@ export async function runCli(argv: string[], env: NodeJS.ProcessEnv = process.en
   }
 
   if (showVersion) {
-    let version = '0.2.0';
+    let version = '0.3.0';
     try {
       const pkgPath = path.resolve(__dirname, '../package.json');
       if (fs.existsSync(pkgPath)) {
