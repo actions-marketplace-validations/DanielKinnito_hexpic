@@ -1,5 +1,5 @@
 name: 'HexPic ASCII Art Generator'
-description: 'Generate crisp vector ASCII art SVGs for your GitHub profile README and docs'
+description: 'Studio-grade TypeScript/React image-to-ASCII & vector SVG engine for web apps, MCP agents, and profile READMEs'
 author: 'Daniel Kinnito'
 branding:
   icon: 'image'
