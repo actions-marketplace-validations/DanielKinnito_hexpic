@@ -563,12 +563,11 @@
         startWidthVal = parseInt(widthInput.value, 10);
         startHeightVal = (currentResult && currentResult.height) ? currentResult.height : (parseInt(heightInput.value, 10) || 55);
 
-        if (mode === 'r' || mode === 'b') {
-          preserveAspectRatioInput.checked = false;
-          heightGroup.style.display = 'block';
-          heightInput.value = startHeightVal;
-          valHeight.textContent = startHeightVal;
-        }
+        // Always unlock height when dragging handles so user has full direct control
+        preserveAspectRatioInput.checked = false;
+        heightGroup.style.display = 'block';
+        heightInput.value = startHeightVal;
+        valHeight.textContent = startHeightVal;
 
         handle.classList.add('active');
         resizableWrapper.classList.add('resizing');
@@ -614,12 +613,10 @@
         widthInput.value = newCols;
         valWidth.textContent = newCols;
 
-        if (!preserveAspectRatioInput.checked) {
-          const deltaRows = Math.round(dy / charH);
-          const newRows = Math.max(10, Math.min(200, startHeightVal + deltaRows));
-          heightInput.value = newRows;
-          valHeight.textContent = newRows;
-        }
+        const deltaRows = Math.round(dy / charH);
+        const newRows = Math.max(10, Math.min(200, startHeightVal + deltaRows));
+        heightInput.value = newRows;
+        valHeight.textContent = newRows;
       }
 
       dragDimensionsTag.textContent = `${widthInput.value} cols × ${heightInput.value} rows`;
