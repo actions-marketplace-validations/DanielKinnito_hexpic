@@ -75,18 +75,6 @@ export class HexPic {
    */
   constructor(options: AsciiArtOptions = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
-    if (typeof document !== 'undefined') {
-      try {
-        const c = document.createElement('canvas');
-        const ctx = c.getContext('2d', { willReadFrequently: true });
-        if (ctx) {
-          this.canvas = c;
-          this.ctx = ctx;
-        }
-      } catch {
-        // Safe fallback in headless / test environments
-      }
-    }
   }
 
   private ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {

@@ -5,10 +5,15 @@
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
+  "bin": {
+    "hexpic-mcp": "dist/bin/hexpic-mcp.js"
+  },
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "llms.txt",
+    "llms-full.txt"
   ],
   "repository": {
     "type": "git",
@@ -63,7 +68,9 @@
     "canvas": "^2.11.2"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "jpeg-js": "^0.4.4",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "zod": "^4.6.7"
   }
 }
