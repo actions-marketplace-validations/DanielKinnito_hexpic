@@ -6,6 +6,7 @@
   "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "bin": {
+    "hexpic": "dist/bin/hexpic.js",
     "hexpic-mcp": "dist/bin/hexpic-mcp.js"
   },
   "files": [

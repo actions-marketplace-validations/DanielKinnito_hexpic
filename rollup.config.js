@@ -68,5 +68,32 @@ export default [
       'path',
       'url'
     ],
+  },
+  // 3. Headless HexPic Terminal & GitHub Action CLI Binary
+  {
+    input: 'bin/hexpic.ts',
+    output: {
+      file: 'dist/bin/hexpic.js',
+      format: 'cjs',
+      sourcemap: true,
+      banner: '#!/usr/bin/env node\n',
+    },
+    plugins: [
+      nodeResolve({ preferBuiltins: true }),
+      commonjs(),
+      typescript({
+        tsconfig: './tsconfig.json',
+        exclude: ['**/*.test.ts'],
+      }),
+    ],
+    external: [
+      'pngjs',
+      'jpeg-js',
+      'fs',
+      'path',
+      'url',
+      'stream',
+      'buffer'
+    ],
   }
 ];
