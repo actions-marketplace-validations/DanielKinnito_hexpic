@@ -249,13 +249,20 @@ describe('HexPic', () => {
       expect(edgeRes.ascii).toBeDefined();
     });
 
-    it('should provide export helpers like saveAsText and toPngDataUrl', async () => {
+    it('should provide export helpers like saveAsText, toPngDataUrl, and toSvg', async () => {
       const img = new Image(100, 100);
       const result = await hexpic.fromImageElement(img as any);
       expect(typeof result.saveAsText).toBe('function');
       expect(typeof result.saveAsPng).toBe('function');
       expect(typeof result.toPngDataUrl).toBe('function');
       expect(typeof result.copyToClipboard).toBe('function');
+      expect(typeof result.toSvg).toBe('function');
+      expect(typeof result.saveAsSvg).toBe('function');
+      expect(typeof result.toSvgBlob).toBe('function');
+
+      const svg = result.toSvg();
+      expect(svg).toContain('<svg');
+      expect(svg).toContain('</svg>');
     });
   });
 

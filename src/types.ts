@@ -113,4 +113,10 @@ export interface AsciiArtResult {
   toPngDataUrl(fontSize?: number, bg?: string, fg?: string): string;
   /** Render the ASCII art onto a Canvas and return a Blob */
   toPngBlob(fontSize?: number, bg?: string, fg?: string): Promise<Blob>;
+  /** Render the ASCII art as a scalable, responsive SVG string */
+  toSvg(fontSize?: number, bg?: string, fg?: string): string;
+  /** Trigger a browser download of the ASCII art as an .svg file */
+  saveAsSvg(filename?: string, fontSize?: number, bg?: string, fg?: string): void;
+  /** Render the ASCII art as an SVG Blob */
+  toSvgBlob(fontSize?: number, bg?: string, fg?: string): Promise<Blob>;
 }
