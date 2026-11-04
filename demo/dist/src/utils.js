@@ -259,7 +259,8 @@ export function applySimpleThresholding(data, width, height, threshold) {
  * Renders ASCII text into clean HTML, grouping adjacent characters with identical colors.
  */
 export function renderColorHtml(lines, colors, backgroundColor = '#000000') {
-    let html = `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${backgroundColor}; margin: 0; padding: 0;">`;
+    const safeBg = escapeHtml(backgroundColor);
+    let html = `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${safeBg}; margin: 0; padding: 0;">`;
     for (let y = 0; y < lines.length; y++) {
         const lineChars = lines[y];
         const rowColors = colors[y] || [];
@@ -268,7 +269,7 @@ export function renderColorHtml(lines, colors, backgroundColor = '#000000') {
         for (let x = 0; x < lineChars.length; x++) {
             const char = lineChars[x];
             const color = rowColors[x] ? `rgb(${rowColors[x].r},${rowColors[x].g},${rowColors[x].b})` : 'inherit';
-            const escapedChar = char === '&' ? '&amp;' : char === '<' ? '&lt;' : char === '>' ? '&gt;' : char;
+            const escapedChar = escapeHtml(char);
             if (color !== currentColor) {
                 if (buffer) {
                     html += currentColor === 'inherit' ? buffer : `<span style="color:${currentColor}">${buffer}</span>`;
@@ -378,7 +379,10 @@ export function loadImage(url) {
         img.src = url;
     });
 }
-function escapeXml(str) {
+/**
+ * Escapes characters for safe inclusion in XML/SVG documents.
+ */
+export function escapeXml(str) {
     return str.replace(/[&<>"']/g, (m) => {
         switch (m) {
             case '&': return '&amp;';
@@ -391,13 +395,31 @@ function escapeXml(str) {
     });
 }
 /**
+ * Escapes characters for safe inclusion in HTML documents and attributes.
+ */
+export function escapeHtml(str) {
+    return str.replace(/[&<>"']/g, (m) => {
+        switch (m) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case '\'': return '&#39;';
+            default: return m;
+        }
+    });
+}
+/**
  * Converts ASCII text (and optional character colors) into a scalable, responsive SVG string.
  */
 export function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#ffffff') {
+    const safeFontSize = Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 12;
+    const safeBg = escapeXml(bg);
+    const safeFg = escapeXml(fg);
     const lines = ascii.split('\n');
     const maxLineLength = Math.max(...lines.map((l) => l.length), 1);
-    const charWidth = fontSize * 0.6;
-    const lineHeight = fontSize;
+    const charWidth = safeFontSize * 0.6;
+    const lineHeight = safeFontSize;
     const svgWidth = Math.ceil(maxLineLength * charWidth);
     const svgHeight = Math.ceil(lines.length * lineHeight);
     const textLines = [];
@@ -406,7 +428,7 @@ export function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#
         const yPos = (y + 0.85) * lineHeight;
         if (!colors || !colors[y]) {
             // Monochrome line
-            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" fill="${fg}" xml:space="preserve">${escapeXml(line)}</text>`);
+            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" fill="${safeFg}" xml:space="preserve">${escapeXml(line)}</text>`);
         }
         else {
             // Color mode line with consecutive color grouping
@@ -437,8 +459,8 @@ export function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#
     }
     return [
         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}">`,
-        `  <rect width="100%" height="100%" fill="${bg}"/>`,
-        `  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="${fontSize}px" letter-spacing="0">`,
+        `  <rect width="100%" height="100%" fill="${safeBg}"/>`,
+        `  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="${safeFontSize}px" letter-spacing="0">`,
         textLines.join('\n'),
         `  </g>`,
         `</svg>`

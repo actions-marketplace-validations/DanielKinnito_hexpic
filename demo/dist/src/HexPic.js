@@ -254,29 +254,31 @@ export class HexPic {
         const currentOptions = { ...this.options, ...options };
         const { width: targetWidth, height: targetHeight, preserveAspectRatio, fontAspectRatio, transparentFrame, useEdgeDetection, edgeIntensity, invertEdgeColors, useSharpen, sharpness, contrast, brightness, grayscale, invert } = currentOptions;
         // Calculate dimensions
+        const safeTargetWidth = Math.max(1, Math.min(2000, Math.floor(Number.isFinite(targetWidth) ? targetWidth : 80)));
+        const safeTargetHeight = Math.max(1, Math.min(2000, Math.floor(Number.isFinite(targetHeight) ? targetHeight : 40)));
         const isExplicitHeight = (options === null || options === void 0 ? void 0 : options.height) !== undefined && options.height > 0;
-        let width = targetWidth;
-        let height = isExplicitHeight ? targetHeight : 0;
+        let width = safeTargetWidth;
+        let height = isExplicitHeight ? safeTargetHeight : 0;
         if (!preserveAspectRatio && isExplicitHeight) {
-            width = targetWidth;
-            height = targetHeight;
+            width = safeTargetWidth;
+            height = safeTargetHeight;
         }
         else {
             const imageAspect = (sourceWidth || 1) / (sourceHeight || 1);
             const correctedAspect = imageAspect / fontAspectRatio;
             if (isExplicitHeight && preserveAspectRatio) {
-                if (targetWidth / targetHeight > correctedAspect) {
-                    width = Math.max(1, Math.floor(targetHeight * correctedAspect));
-                    height = targetHeight;
+                if (safeTargetWidth / safeTargetHeight > correctedAspect) {
+                    width = Math.max(1, Math.floor(safeTargetHeight * correctedAspect));
+                    height = safeTargetHeight;
                 }
                 else {
-                    width = targetWidth;
-                    height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+                    width = safeTargetWidth;
+                    height = Math.max(1, Math.floor(safeTargetWidth / correctedAspect));
                 }
             }
             else {
-                width = targetWidth;
-                height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+                width = safeTargetWidth;
+                height = Math.max(1, Math.floor(safeTargetWidth / correctedAspect));
             }
         }
         const frame = Math.max(0, transparentFrame);
@@ -450,9 +452,11 @@ export class HexPic {
                 colors.push(rowColors);
         }
         const ascii = lines.join('\n');
+        const safeBg = escapeHtml(backgroundColor);
+        const safeFg = escapeHtml(textColor);
         const html = isColor
-            ? renderColorHtml(lines, colors, backgroundColor)
-            : `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${backgroundColor}; color: ${textColor}; margin: 0; padding: 0;">${escapeHtml(ascii)}</pre>`;
+            ? renderColorHtml(lines, colors, safeBg)
+            : `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${safeBg}; color: ${safeFg}; margin: 0; padding: 0;">${escapeHtml(ascii)}</pre>`;
         return {
             ascii,
             html,
