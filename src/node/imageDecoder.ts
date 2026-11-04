@@ -108,3 +108,4 @@ export async function resolveImageSource(source: string): Promise<Buffer> {
 
   return fs.promises.readFile(resolvedPath);
 }
+

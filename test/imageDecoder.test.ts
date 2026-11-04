@@ -91,3 +91,4 @@ describe('imageDecoder (Node headless)', () => {
     });
   });
 });
+

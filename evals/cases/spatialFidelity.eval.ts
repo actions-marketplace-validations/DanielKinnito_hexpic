@@ -56,3 +56,4 @@ export async function runSpatialFidelityEval(): Promise<EvalResult> {
     metrics: { centerDensityPct: centerDensity, cornerDensityPct: tlDensity }
   };
 }
+

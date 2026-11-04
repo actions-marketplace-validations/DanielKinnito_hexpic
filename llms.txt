@@ -24,3 +24,4 @@ When operating as an AI tool or MCP server, HexPic enables models to inspect, su
 
 - [Live Demo](https://danielkinnito.github.io/hexpic/): Interactive browser studio for tuning dithering, contrast, and palettes in real time.
 - [Evaluation Suite](./evals/): Automated benchmarks measuring tool-calling validity, parameter recovery, and contour fidelity.
+

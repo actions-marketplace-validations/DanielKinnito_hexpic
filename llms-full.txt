@@ -160,3 +160,4 @@ const result = hexpic.fromPixels(data, width, height, {
 console.log(result.ascii);
 ```
 </doc>
+

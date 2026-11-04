@@ -13,3 +13,4 @@ main().catch((error) => {
   process.stderr.write(`Fatal error in HexPic MCP server: ${error}\n`);
   process.exit(1);
 });
+
