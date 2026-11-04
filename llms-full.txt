@@ -165,3 +165,34 @@ console.log(result.ascii);
 ```
 </doc>
 
+## CLI & GitHub Action Integration
+
+<doc title="HexPic Command-Line Interface (CLI)" path="bin/hexpic.ts">
+The CLI can be invoked via `npx hexpic [image] [options]`.
+Flags:
+- `-o, --output`: Destination file path (`.svg`, `.txt`, `.html`). Defaults to stdout.
+- `-f, --format`: Output format: `svg`, `text`, or `html`.
+- `-w, --width`: Character column width (default: 70).
+- `--height`: Character row height.
+- `-c, --color-mode`: `color` or `monochrome` (default: `color`).
+- `-d, --dithering`: `atkinson`, `floyd-steinberg`, `bayer`, `none` (default: `atkinson`).
+- `--charset`: Built-in preset name or custom string.
+- `--font-size`: Monospace font size in pixels for SVG rendering (default: 12).
+- `--bg`: Background color for SVG (default: #000000).
+- `--fg`: Foreground text color for monochrome SVG (default: #ffffff).
+</doc>
+
+<doc title="Official GitHub Action" path="action.yml">
+Automate SVG banner generation for GitHub profile READMEs:
+```yaml
+- uses: DanielKinnito/hexpic@main
+  with:
+    # Defaults to repository owner avatar (https://github.com/<owner>.png)
+    output: './assets/hexpic.svg'
+    width: '70'
+    color-mode: 'color'
+    dithering: 'atkinson'
+```
+</doc>
+
+

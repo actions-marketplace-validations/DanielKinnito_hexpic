@@ -13,7 +13,9 @@ When operating as an AI tool or MCP server, HexPic enables models to inspect, su
 - [Dithering Routines](./README.md#features): Atkinson, Floyd-Steinberg, Jarvis-Judice-Ninke, and Stucki error diffusion algorithms.
 - [Convolution Filters](./README.md#features): 3x3 Sobel edge detection and unsharp masking sharpen kernels.
 - [React Components](./README.md#react--nextjs): SSR-safe `<HexPicImage />` and reactive `useHexPic` hook.
-- [Markdown & SVG Integration](./README.md#markdown--github-profile-readmes): Standalone scalable SVG generation (`toSvg`) for embedding in GitHub READMEs.
+- [Markdown & SVG Integration](./README.md#markdown-layout--aesthetics): Standalone scalable SVG generation (`toSvg`) for embedding in GitHub READMEs.
+- [CLI & Terminal Usage](./README.md#command-line-interface-cli): Standalone command line binary (`npx hexpic`) for batch converting images to SVG, HTML, or text.
+- [GitHub Action](./README.md#github-action-automated-profile-readmes): Official composite GitHub Action (`uses: DanielKinnito/hexpic@main`) for automated profile README banners.
 
 ## MCP Tools Reference
 

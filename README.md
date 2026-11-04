@@ -94,31 +94,104 @@ result.saveAsSvg('output.svg', 12); // Scalable SVG for Markdown
 const svgString = result.toSvg(12);
 ```
 
-### Markdown & GitHub Profile READMEs
+### GitHub Action (Automated Profile READMEs)
 
-GitHub Flavored Markdown strips custom HTML styling in code blocks, preventing colored ASCII. To embed TrueColor ASCII art directly into your GitHub profile README or documentation, export a standalone `.svg`:
+Generate and update crisp vector ASCII art SVGs directly in your GitHub profile repository or docs using GitHub's free runners. No server hosting, no manual file copying.
 
-```typescript
-import HexPic from 'hexpic';
-import fs from 'fs';
+Create `.github/workflows/hexpic.yml` in your profile repository:
 
-const converter = new HexPic({
-  width: 80,
-  dithering: 'atkinson',
-  colorMode: 'color'
-});
+```yaml
+name: Generate HexPic ASCII Banner
 
-const result = await converter.fromUrl('./avatar.png');
-fs.writeFileSync('./ascii-avatar.svg', result.toSvg());
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Runs every Monday at midnight
+  workflow_dispatch:    # Allows manual trigger with 1 click
+  push:
+    branches: [main]
+
+jobs:
+  ascii-art:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate ASCII Art SVG
+        uses: DanielKinnito/hexpic@main
+        with:
+          # image defaults automatically to https://github.com/<owner>.png
+          output: './assets/hexpic.svg'
+          width: '70'
+          color-mode: 'color'
+          dithering: 'atkinson'
+
+      - name: Commit and Push SVG
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: update ascii banner'
+          add: './assets/hexpic.svg'
 ```
 
-Embed it cleanly in any markdown file:
+#### Markdown Layout & Aesthetics
 
+Because HexPic generates standard vector SVGs with tight bounding boxes (`viewBox`), you have full control over alignment and sizing in your `README.md`:
+
+**1. Centered Header Banner**
+```html
+<div align="center">
+  <img src="./assets/hexpic.svg" alt="ASCII Banner" width="600" />
+</div>
+```
+
+**2. Side-by-Side Avatar and Bio**
 ```markdown
-![My Profile Banner](./ascii-avatar.svg)
+| <img src="./assets/hexpic.svg" width="280" alt="Avatar" /> | ### Hi, I'm Alex<br>Full-stack developer building open-source tools.<br><br>• Working on LLM agents<br>• Open to collaborations |
+| :--- | :--- |
 ```
 
-SVGs scale smoothly across mobile and high-DPI screens without pixelation.
+**3. Automatic Dark & Light Mode Switching**
+```html
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/hexpic-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="./assets/hexpic-light.svg">
+  <img alt="HexPic ASCII Art" src="./assets/hexpic-dark.svg" width="500">
+</picture>
+```
+
+---
+
+### Command-Line Interface (CLI)
+
+Run HexPic directly from your terminal or build scripts without a browser:
+
+```bash
+# Convert local image to SVG for your profile
+npx hexpic ./profile.png -o ./assets/banner.svg -w 70
+
+# Convert remote avatar using Atkinson dithering
+npx hexpic https://github.com/octocat.png -o octocat.svg -d atkinson
+
+# Print colored or monochrome ASCII to stdout
+npx hexpic ./logo.png -f text -w 40 -c monochrome
+```
+
+#### CLI Options
+
+| Flag | Argument | Description | Default |
+|---|---|---|---|
+| `-o`, `--output` | `<file>` | Output destination path (`.svg`, `.txt`, `.html`) | stdout |
+| `-f`, `--format` | `svg \| text \| html` | Output format | `svg` (file) / `text` (stdout) |
+| `-w`, `--width` | `<cols>` | Number of character columns | `70` |
+| `--height` | `<rows>` | Number of rows (aspect ratio preserved if omitted) | auto |
+| `-c`, `--color-mode` | `color \| monochrome` | Color mode | `color` |
+| `-d`, `--dithering` | `<algorithm>` | `atkinson`, `floyd-steinberg`, `bayer`, `none` | `atkinson` |
+| `--charset` | `<preset>` | `normal`, `minimalist`, `alphabetic`, `math`, `braille` | `normal` |
+| `--font-size` | `<px>` | Monospace font size for SVG rendering | `12` |
+| `--bg` | `<hex>` | Background color for SVG canvas | `#000000` |
+| `--fg` | `<hex>` | Text color for monochrome SVG canvas | `#ffffff` |
+| `--contrast` | `<pct>` | Contrast adjustment percentage | `100` |
+| `--brightness` | `<pct>` | Brightness adjustment percentage | `100` |
+| `--invert` | none | Invert image brightness | `false` |
 
 ### React / Next.js
 
