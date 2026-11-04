@@ -1223,7 +1223,7 @@ async function runCli(argv, env = process.env) {
         return { code: 0, stdout: HELP_TEXT.trim(), stderr: '' };
     }
     if (showVersion) {
-        let version = '0.3.0';
+        let version = '0.3.1';
         try {
             const pkgPath = path.resolve(__dirname, '../package.json');
             if (fs.existsSync(pkgPath)) {
