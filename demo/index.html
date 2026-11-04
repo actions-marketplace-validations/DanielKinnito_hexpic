@@ -267,7 +267,8 @@
         <div class="action-grid">
           <button id="btnCopy" class="btn btn-primary">Copy Text</button>
           <button id="btnDownloadTxt" class="btn btn-secondary">Save .TXT</button>
-          <button id="btnDownloadPng" class="btn btn-success" style="grid-column: 1 / -1;">Download Canvas PNG</button>
+          <button id="btnDownloadSvg" class="btn btn-secondary">Export SVG</button>
+          <button id="btnDownloadPng" class="btn btn-secondary">Canvas PNG</button>
         </div>
       </aside>
 
@@ -742,6 +743,11 @@
 
     btnDownloadTxt.addEventListener('click', () => {
       if (currentResult) currentResult.saveAsText('hexpic-art.txt');
+    });
+
+    const btnDownloadSvg = document.getElementById('btnDownloadSvg');
+    btnDownloadSvg.addEventListener('click', () => {
+      if (currentResult) currentResult.saveAsSvg('hexpic-art.svg', 12);
     });
 
     btnDownloadPng.addEventListener('click', () => {

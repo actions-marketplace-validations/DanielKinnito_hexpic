@@ -25,6 +25,11 @@ export declare const convertImageSchema: {
     contrast: z.ZodOptional<z.ZodNumber>;
     brightness: z.ZodOptional<z.ZodNumber>;
     invert: z.ZodOptional<z.ZodBoolean>;
+    format: z.ZodOptional<z.ZodEnum<{
+        html: "html";
+        svg: "svg";
+        text: "text";
+    }>>;
 };
 export declare const analyzeSpatialLayoutSchema: {
     source: z.ZodString;
@@ -45,6 +50,7 @@ export interface ConvertImageArgs {
     contrast?: number;
     brightness?: number;
     invert?: boolean;
+    format?: 'text' | 'html' | 'svg';
 }
 export interface AnalyzeSpatialLayoutArgs {
     source: string;

@@ -77,4 +77,8 @@ export declare function copyTextToClipboard(text: string): Promise<void>;
  * Loads an image from a URL with crossOrigin anonymous.
  */
 export declare function loadImage(url: string): Promise<HTMLImageElement>;
+/**
+ * Converts ASCII text (and optional character colors) into a scalable, responsive SVG string.
+ */
+export declare function asciiToSvg(ascii: string, colors?: CharColor[][], fontSize?: number, bg?: string, fg?: string): string;
 //# sourceMappingURL=utils.d.ts.map

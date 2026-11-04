@@ -378,4 +378,70 @@ export function loadImage(url) {
         img.src = url;
     });
 }
+function escapeXml(str) {
+    return str.replace(/[&<>"']/g, (m) => {
+        switch (m) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case '\'': return '&apos;';
+            default: return m;
+        }
+    });
+}
+/**
+ * Converts ASCII text (and optional character colors) into a scalable, responsive SVG string.
+ */
+export function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#ffffff') {
+    const lines = ascii.split('\n');
+    const maxLineLength = Math.max(...lines.map((l) => l.length), 1);
+    const charWidth = fontSize * 0.6;
+    const lineHeight = fontSize;
+    const svgWidth = Math.ceil(maxLineLength * charWidth);
+    const svgHeight = Math.ceil(lines.length * lineHeight);
+    const textLines = [];
+    for (let y = 0; y < lines.length; y++) {
+        const line = lines[y];
+        const yPos = (y + 0.85) * lineHeight;
+        if (!colors || !colors[y]) {
+            // Monochrome line
+            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" fill="${fg}" xml:space="preserve">${escapeXml(line)}</text>`);
+        }
+        else {
+            // Color mode line with consecutive color grouping
+            const rowColors = colors[y];
+            let tspanBuffer = '';
+            let currentColor = '';
+            let currentText = '';
+            for (let x = 0; x < line.length; x++) {
+                const char = line[x];
+                const color = rowColors[x] || { r: 255, g: 255, b: 255 };
+                const colorStr = `rgb(${color.r},${color.g},${color.b})`;
+                if (colorStr === currentColor) {
+                    currentText += char;
+                }
+                else {
+                    if (currentText.length > 0) {
+                        tspanBuffer += `<tspan fill="${currentColor}">${escapeXml(currentText)}</tspan>`;
+                    }
+                    currentColor = colorStr;
+                    currentText = char;
+                }
+            }
+            if (currentText.length > 0) {
+                tspanBuffer += `<tspan fill="${currentColor}">${escapeXml(currentText)}</tspan>`;
+            }
+            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" xml:space="preserve">${tspanBuffer}</text>`);
+        }
+    }
+    return [
+        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}">`,
+        `  <rect width="100%" height="100%" fill="${bg}"/>`,
+        `  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="${fontSize}px" letter-spacing="0">`,
+        textLines.join('\n'),
+        `  </g>`,
+        `</svg>`
+    ].join('\n');
+}
 //# sourceMappingURL=utils.js.map

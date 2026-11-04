@@ -69,6 +69,9 @@ export interface AsciiArtResult {
   saveAsPng(filename?: string, fontSize?: number, bg?: string, fg?: string): void;
   toPngDataUrl(fontSize?: number, bg?: string, fg?: string): string;
   toPngBlob(fontSize?: number, bg?: string, fg?: string): Promise<Blob>;
+  toSvg(fontSize?: number, bg?: string, fg?: string): string;
+  saveAsSvg(filename?: string, fontSize?: number, bg?: string, fg?: string): void;
+  toSvgBlob(fontSize?: number, bg?: string, fg?: string): Promise<Blob>;
 }
 ```
 </doc>
@@ -123,6 +126,7 @@ Converts an image into an ASCII character grid with optional dithering and edge 
   - `contrast` (number, 0-300, optional, default: 100).
   - `brightness` (number, 0-300, optional, default: 100).
   - `invert` (boolean, optional, default: false).
+  - `format` ("text" | "html" | "svg", optional, default: "text"): Output representation. When "svg" is passed, returns a standalone SVG string ready for Markdown embeds.
 
 #### 2. `analyze_spatial_layout`
 Generates an edge contour map and quadrant density distribution report to help text-only models perceive visual composition and object positions.

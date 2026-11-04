@@ -1,4 +1,4 @@
-import { resolveCharset, rgbToGrayscale, getAsciiChar, applyEdgeDetection, applySharpen, applyEdgeDetectionToPixels, applySharpenToPixels, resamplePixels, adjustPixelsColor, applySimpleThresholding, renderColorHtml, asciiToCanvas, downloadBlob, copyTextToClipboard, loadImage } from './utils';
+import { resolveCharset, rgbToGrayscale, getAsciiChar, applyEdgeDetection, applySharpen, applyEdgeDetectionToPixels, applySharpenToPixels, resamplePixels, adjustPixelsColor, applySimpleThresholding, renderColorHtml, asciiToCanvas, asciiToSvg, downloadBlob, copyTextToClipboard, loadImage } from './utils';
 /**
  * Default options for ASCII art generation
  */
@@ -486,6 +486,24 @@ export class HexPic {
                 return new Promise((res, rej) => {
                     canvas.toBlob((b) => (b ? res(b) : rej(new Error('Canvas blob generation failed'))), 'image/png');
                 });
+            },
+            toSvg(fontSize = 12, bg = backgroundColor, fg = textColor) {
+                return asciiToSvg(ascii, isColor ? colors : undefined, fontSize, bg, fg);
+            },
+            saveAsSvg(filename = 'ascii-art.svg', fontSize = 12, bg = backgroundColor, fg = textColor) {
+                const svgString = asciiToSvg(ascii, isColor ? colors : undefined, fontSize, bg, fg);
+                if (typeof Blob === 'undefined') {
+                    throw new Error('saveAsSvg requires a browser environment. Use result.toSvg() in Node.js.');
+                }
+                const blob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                downloadBlob(blob, filename);
+            },
+            toSvgBlob(fontSize = 12, bg = backgroundColor, fg = textColor) {
+                const svgString = asciiToSvg(ascii, isColor ? colors : undefined, fontSize, bg, fg);
+                if (typeof Blob === 'undefined') {
+                    return Promise.reject(new Error('toSvgBlob requires a browser environment. Use result.toSvg() in Node.js.'));
+                }
+                return Promise.resolve(new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' }));
             }
         };
     }

@@ -90,7 +90,35 @@ document.getElementById('output').innerHTML = result.html;
 await result.copyToClipboard();
 result.saveAsText('output.txt');
 result.saveAsPng('output.png', 12);
+result.saveAsSvg('output.svg', 12); // Scalable SVG for Markdown
+const svgString = result.toSvg(12);
 ```
+
+### Markdown & GitHub Profile READMEs
+
+GitHub Flavored Markdown strips custom HTML styling in code blocks, preventing colored ASCII. To embed TrueColor ASCII art directly into your GitHub profile README or documentation, export a standalone `.svg`:
+
+```typescript
+import HexPic from 'hexpic';
+import fs from 'fs';
+
+const converter = new HexPic({
+  width: 80,
+  dithering: 'atkinson',
+  colorMode: 'color'
+});
+
+const result = await converter.fromUrl('./avatar.png');
+fs.writeFileSync('./ascii-avatar.svg', result.toSvg());
+```
+
+Embed it cleanly in any markdown file:
+
+```markdown
+![My Profile Banner](./ascii-avatar.svg)
+```
+
+SVGs scale smoothly across mobile and high-DPI screens without pixelation.
 
 ### React / Next.js
 
