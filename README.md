@@ -1,104 +1,69 @@
-# hexpic
-
-Browser and Node.js image-to-ASCII converter with error-diffusion dithering, edge convolution, and color HTML output.
-
-[Live Demo](https://danielkinnito.github.io/hexpic/)
-
-Processes images directly on the client using the HTML5 Canvas API without external servers or native binary dependencies.
-
----
-
-## Features
-
-- **Dithering algorithms**: Atkinson, Floyd-Steinberg, Jarvis-Judice-Ninke (JJN), and Stucki error-diffusion routines to prevent posterization and tonal banding.
-- **Spatial convolution**: 3x3 Sobel edge detection and unsharp masking sharpen kernels to preserve outlines, contours, and facial features.
-- **TrueColor HTML rendering**: Generates both plaintext character grids and styled HTML `<span>` elements preserving source 24-bit RGB values.
-- **Character palettes**: Built-in presets for standard ASCII, Code Page 437 (`█▓▒░`), Block Elements (`█▀▄▌▐░▒▓`), Braille (`⣿⣶⣤⣀`), minimalist, numeric, math symbols, and custom strings.
-- **Negative space padding**: Configurable whitespace density to suppress stray punctuation marks on light or uniform backgrounds.
-- **Aspect ratio correction**: Built-in `0.55` font aspect ratio scaler to counter vertical stretching inherent to monospace typefaces.
-- **Framework and runtime support**: Native ES modules (Vite, Next.js, Remix, Astro), CommonJS, UMD script tag, and React components (`<HexPicImage />`, `useHexPic`).
-- **Model Context Protocol (MCP) Server**: Built-in stdio server (`hexpic-mcp`) allowing AI agents (Claude Desktop, Cursor, Antigravity) to drive image conversion and spatial composition analysis.
-- **Headless Node engine**: Pure JavaScript image decoders for PNG and JPEG without native build dependencies or DOM requirements.
-- **Export helpers**: Utilities for clipboard copying, `.txt` file generation, and raster PNG rendering via offscreen canvas.
+<div align="center">
+  <h1>hexpic</h1>
+  <p><strong>Studio-grade image to ASCII & vector SVG engine for the browser, Node.js, CLI, and AI agents.</strong></p>
+  <p>
+    <a href="https://www.npmjs.com/package/hexpic"><img src="https://img.shields.io/npm/v/hexpic.svg?style=flat-square&color=38bdf8" alt="npm version" /></a>
+    <a href="https://github.com/DanielKinnito/hexpic/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="license" /></a>
+    <a href="https://danielkinnito.github.io/hexpic/"><img src="https://img.shields.io/badge/demo-live%20studio-34d399.svg?style=flat-square" alt="live demo" /></a>
+    <a href="#github-action-profile-readme-automation"><img src="https://img.shields.io/badge/github%20action-ready-8b5cf6.svg?style=flat-square" alt="github action" /></a>
+    <a href="#model-context-protocol-mcp-server"><img src="https://img.shields.io/badge/mcp%20server-ready-ec4899.svg?style=flat-square" alt="mcp server" /></a>
+  </p>
+  <br />
+  <img src="./assets/hero-banner.svg" alt="HexPic TrueColor ASCII Art" width="560" />
+  <br />
+  <sub>TrueColor ASCII art rendered with Atkinson error-diffusion dithering via HexPic</sub>
+</div>
 
 ---
 
-## Installation
+### Overview
+
+HexPic is a high-performance visual transformation engine that converts raster images (PNG, JPEG, WebP) into TrueColor character grids and scalable vector SVGs. It executes anywhere: directly inside the browser using HTML5 Canvas, headlessly in Node.js via pure JavaScript decoders, on the command line via `npx hexpic`, automatically inside GitHub Actions, or as a Model Context Protocol (MCP) server for LLMs.
+
+- **Zero Server Latency**: In-browser client canvas processing without remote API calls or data transmission.
+- **Pure Vector SVG Export**: Crisp monospace typography with exact bounding boxes (`viewBox`) for GitHub profile READMEs.
+- **Error-Diffusion Dithering**: Atkinson (classic Mac OS), Floyd-Steinberg, Jarvis-Judice-Ninke (JJN), and Stucki algorithms to prevent tonal banding.
+- **Spatial Convolutions**: 3x3 Sobel edge detection and unsharp masking sharpen filters to preserve contours and facial features.
+- **Monospace Aspect Correction**: Automatic `0.55` aspect scaling to counter vertical elongation inherent to terminal fonts.
+- **AI Agent Native**: Built-in MCP server providing tools for visual layout inspection, edge contour extraction, and token-efficient vision comprehension.
+
+[Try the Interactive Studio](https://danielkinnito.github.io/hexpic/)
+
+---
+
+### Execution Modes
+
+| Environment | Primary Interface | Typical Use Case |
+|---|---|---|
+| **GitHub Actions** | `uses: DanielKinnito/hexpic@main` | Automated profile README banners & documentation |
+| **Terminal / CLI** | `npx hexpic <image> -o banner.svg` | Batch conversion, build scripts, local terminal art |
+| **React / Next.js** | `<HexPicImage />`, `useHexPic()` | Dynamic user avatars, responsive art components |
+| **Vanilla Web** | `<img data-hexpic>`, `HexPic.init()` | Drop-in HTML enhancement without bundlers |
+| **Node.js Headless** | `hexpic.fromPixels(data, w, h)` | Serverless workers, Discord/Slack bots, automation |
+| **AI Agents** | `hexpic-mcp` (stdio MCP server) | Claude Desktop, Cursor, and Antigravity vision tools |
+
+---
+
+### Quickstart
+
+#### 1. Command-Line Interface (CLI)
+
+Run HexPic instantly without installing globally:
 
 ```bash
-npm install hexpic
+# Convert local avatar to SVG for your GitHub profile
+npx hexpic ./profile.png -o ./assets/banner.svg -w 70 --dithering atkinson
+
+# Fetch remote image and generate colored SVG
+npx hexpic https://github.com/octocat.png -o octocat.svg -c color
+
+# Output plain monochrome ASCII directly to stdout
+npx hexpic ./logo.png -f text -w 40 -c monochrome
 ```
 
-For browser environments without a build step:
+#### 2. GitHub Action (Profile README Automation)
 
-```html
-<script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"></script>
-```
-
----
-
-## Usage
-
-### Declarative HTML Plugin
-
-Add `data-hexpic` to any `<img>` element and call `HexPic.init()`:
-
-```html
-<img 
-  src="/images/profile.jpg" 
-  data-hexpic 
-  data-hexpic-width="100" 
-  data-hexpic-dithering="atkinson" 
-  data-hexpic-charset="blockelement" 
-  data-hexpic-color-mode="color"
-/>
-
-<script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"></script>
-<script>
-  HexPic.init();
-</script>
-```
-
-### TypeScript / JavaScript API
-
-```typescript
-import HexPic from 'hexpic';
-
-const converter = new HexPic({
-  width: 100,
-  dithering: 'atkinson',
-  charset: 'blockelement',
-  colorMode: 'color',
-  useSharpen: true,
-  useEdgeDetection: true,
-  edgeIntensity: 1.0,
-  spaceDensity: 1,
-  contrast: 105,
-  brightness: 100
-});
-
-// Accepts URL string, File object, or HTMLImageElement
-const result = await converter.fromUrl('/avatar.png');
-
-// Plaintext output
-console.log(result.ascii);
-
-// Colored HTML output
-document.getElementById('output').innerHTML = result.html;
-
-// Export methods
-await result.copyToClipboard();
-result.saveAsText('output.txt');
-result.saveAsPng('output.png', 12);
-result.saveAsSvg('output.svg', 12); // Scalable SVG for Markdown
-const svgString = result.toSvg(12);
-```
-
-### GitHub Action (Automated Profile READMEs)
-
-Generate and update crisp vector ASCII art SVGs directly in your GitHub profile repository or docs using GitHub's free runners. No server hosting, no manual file copying.
-
-Create `.github/workflows/hexpic.yml` in your profile repository:
+Automate your GitHub profile banner using GitHub's free runners. Create `.github/workflows/hexpic.yml` in your profile repository:
 
 ```yaml
 name: Generate HexPic ASCII Banner
@@ -106,7 +71,7 @@ name: Generate HexPic ASCII Banner
 on:
   schedule:
     - cron: '0 0 * * 1' # Runs every Monday at midnight
-  workflow_dispatch:    # Allows manual trigger with 1 click
+  workflow_dispatch:    # Allows 1-click manual trigger
   push:
     branches: [main]
 
@@ -132,24 +97,93 @@ jobs:
           add: './assets/hexpic.svg'
 ```
 
-#### Markdown Layout & Aesthetics
+#### 3. React / Next.js
 
-Because HexPic generates standard vector SVGs with tight bounding boxes (`viewBox`), you have full control over alignment and sizing in your `README.md`:
+Install the package:
 
-**1. Centered Header Banner**
+```bash
+npm install hexpic
+```
+
+Import SSR-safe components:
+
+```tsx
+'use client';
+
+import React from 'react';
+import { HexPicImage, useHexPic } from 'hexpic';
+
+// Declarative Image Component
+export function UserAvatar() {
+  return (
+    <HexPicImage
+      src="/avatar.png"
+      alt="User Avatar"
+      options={{
+        width: 70,
+        dithering: 'atkinson',
+        colorMode: 'color'
+      }}
+      style={{ fontSize: '9px', lineHeight: '0.60em' }}
+    />
+  );
+}
+
+// Interactive Hook
+export function CustomEditor() {
+  const { ascii, convert, copyToClipboard, isLoading } = useHexPic({
+    width: 80,
+    dithering: 'floyd-steinberg'
+  });
+
+  return (
+    <div>
+      <input type="file" onChange={(e) => e.target.files?.[0] && convert(e.target.files[0])} />
+      <button onClick={() => copyToClipboard()}>Copy ASCII</button>
+      <pre>{isLoading ? 'Processing...' : ascii}</pre>
+    </div>
+  );
+}
+```
+
+#### 4. Vanilla HTML Drop-in
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"></script>
+
+<img 
+  src="/images/photo.jpg" 
+  data-hexpic 
+  data-hexpic-width="90" 
+  data-hexpic-dithering="atkinson" 
+  data-hexpic-color-mode="color" 
+/>
+
+<script>
+  HexPic.init();
+</script>
+```
+
+---
+
+### Markdown Layout & Profile Aesthetics
+
+Because HexPic generates standard vector SVGs with tight character bounding boxes (`viewBox`), you have full control over alignment and sizing in your Markdown files:
+
+#### Centered Header Banner
 ```html
 <div align="center">
   <img src="./assets/hexpic.svg" alt="ASCII Banner" width="600" />
 </div>
 ```
 
-**2. Side-by-Side Avatar and Bio**
+#### Side-by-Side Avatar and Bio
 ```markdown
 | <img src="./assets/hexpic.svg" width="280" alt="Avatar" /> | ### Hi, I'm Alex<br>Full-stack developer building open-source tools.<br><br>• Working on LLM agents<br>• Open to collaborations |
 | :--- | :--- |
 ```
 
-**3. Automatic Dark & Light Mode Switching**
+#### Automatic Dark & Light Mode Switching
 ```html
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="./assets/hexpic-dark.svg">
@@ -160,22 +194,18 @@ Because HexPic generates standard vector SVGs with tight bounding boxes (`viewBo
 
 ---
 
-### Command-Line Interface (CLI)
+### CLI Reference
 
-Run HexPic directly from your terminal or build scripts without a browser:
-
-```bash
-# Convert local image to SVG for your profile
-npx hexpic ./profile.png -o ./assets/banner.svg -w 70
-
-# Convert remote avatar using Atkinson dithering
-npx hexpic https://github.com/octocat.png -o octocat.svg -d atkinson
-
-# Print colored or monochrome ASCII to stdout
-npx hexpic ./logo.png -f text -w 40 -c monochrome
 ```
+Usage:
+  hexpic [image] [options]
+  npx hexpic [image] [options]
 
-#### CLI Options
+Arguments:
+  [image]                     Local path or remote URL (http/https).
+                              Defaults to https://github.com/<owner>.png if
+                              GITHUB_REPOSITORY_OWNER environment variable exists.
+```
 
 | Flag | Argument | Description | Default |
 |---|---|---|---|
@@ -193,61 +223,43 @@ npx hexpic ./logo.png -f text -w 40 -c monochrome
 | `--brightness` | `<pct>` | Brightness adjustment percentage | `100` |
 | `--invert` | none | Invert image brightness | `false` |
 
-### React / Next.js
+---
 
-HexPic components are SSR-safe and execute canvas routines after client mount:
+### TypeScript & Headless Node API
 
-```tsx
-'use client';
+```typescript
+import HexPic from 'hexpic';
+import fs from 'fs';
 
-import React from 'react';
-import { HexPicImage, useHexPic } from 'hexpic';
+const hexpic = new HexPic({
+  width: 90,
+  dithering: 'atkinson',
+  charset: 'blockelement',
+  colorMode: 'color',
+  useSharpen: true,
+  contrast: 110
+});
 
-// Component
-export function Avatar() {
-  return (
-    <HexPicImage
-      src="/user.jpg"
-      alt="User Avatar"
-      options={{
-        width: 80,
-        dithering: 'atkinson',
-        charset: 'codepage437',
-        colorMode: 'color'
-      }}
-      style={{ fontSize: '7px', lineHeight: '7px' }}
-    />
-  );
-}
+// Browser: fromUrl, fromFile, fromImageElement
+const result = await hexpic.fromUrl('/avatar.png');
 
-// Hook
-export function Editor() {
-  const { ascii, convert, copyToClipboard, saveAsPng, isLoading } = useHexPic({
-    width: 90,
-    dithering: 'floyd-steinberg',
-    charset: 'normal'
-  });
+// Headless Node: from raw pixel buffer
+// const result = hexpic.fromPixels(rgbaData, width, height, options);
 
-  return (
-    <div>
-      <input 
-        type="file" 
-        accept="image/*" 
-        onChange={(e) => e.target.files?.[0] && convert(e.target.files[0])} 
-      />
-      <button onClick={() => copyToClipboard()}>Copy</button>
-      <button onClick={() => saveAsPng('art.png')}>Save PNG</button>
-      <pre>{isLoading ? 'Processing...' : ascii}</pre>
-    </div>
-  );
-}
+console.log(result.ascii);                       // Plaintext character grid
+document.body.innerHTML = result.html;           // TrueColor HTML spans
+fs.writeFileSync('art.svg', result.toSvg(12));   // Scalable SVG string
+await result.copyToClipboard();                  // Clipboard write
+result.saveAsPng('art.png', 12);                 // Canvas PNG export
 ```
+
+---
 
 ### Model Context Protocol (MCP) Server
 
-HexPic provides an official MCP server enabling AI agents (Claude Desktop, Cursor, Antigravity) to convert images and inspect spatial composition via stdio.
+HexPic includes an official MCP server enabling AI agents (Claude Desktop, Cursor, Antigravity) to convert images and inspect spatial composition via standard input/output (`stdio`).
 
-Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
+Add to your MCP configuration (e.g. `claude_desktop_config.json`):
 
 ```json
 {
@@ -260,22 +272,23 @@ Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
 }
 ```
 
-#### Available MCP Tools:
-- `convert_image`: Convert any image file, URL, or base64 data URI to ASCII with dithering and edge options.
-- `analyze_spatial_layout`: Extract visual edge contours and quadrant density percentages for token-efficient vision understanding.
-- `get_presets`: Retrieve all available character palettes and dithering algorithms.
+#### Available MCP Tools
+
+- **`convert_image`**: Convert local files, HTTP URLs, or base64 data URIs into formatted ASCII or TrueColor HTML with custom dithering and dimensions.
+- **`analyze_spatial_layout`**: Extract visual edge contours and quadrant density percentages for token-efficient vision understanding without expensive image tokens.
+- **`get_presets`**: Retrieve all available character palettes (`normal`, `blockelement`, `codepage437`, `braille`, `math`, `minimalist`) and algorithm recommendations.
 
 ---
 
-## Configuration
+### Configuration Options
 
 | Option | Type | Default | Description |
 |---|---|---|---|
 | `width` | `number` | `80` | Number of horizontal character columns |
-| `height` | `number` | `40` | Number of vertical rows (calculated automatically if `preserveAspectRatio` is true) |
+| `height` | `number` | `auto` | Number of vertical rows (calculated from aspect ratio if omitted) |
 | `dithering` | `'none' \| 'atkinson' \| 'floyd-steinberg' \| 'jjn' \| 'stucki'` | `'none'` | Error-diffusion dithering algorithm |
-| `charset` | `CharsetPreset \| string` | `'normal'` | Built-in preset name or custom character palette ordered darkest to lightest |
-| `colorMode` | `'monochrome' \| 'color'` | `'monochrome'` | Plain text monospace or 24-bit color HTML `<span>` output |
+| `charset` | `CharsetPreset \| string` | `'normal'` | Built-in preset name or custom character string ordered darkest to lightest |
+| `colorMode` | `'monochrome' \| 'color'` | `'monochrome'` | Plain text monospace or 24-bit color HTML spans |
 | `spaceDensity` | `number` | `1` | Padding spaces appended to character palette to suppress background noise |
 | `useEdgeDetection` | `boolean` | `false` | Apply 3x3 Sobel convolution edge detection |
 | `edgeIntensity` | `number` | `1.0` | Sobel gradient magnitude multiplier (0.1 to 2.0) |
@@ -293,25 +306,26 @@ Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
 | `invert` | `boolean` | `false` | Invert luminance map |
 | `transparentFrame` | `number` | `0` | Outer border frame padding in character units (0 to 20) |
 | `preserveAspectRatio` | `boolean` | `true` | Compute output height from input image aspect ratio |
-| `fontAspectRatio` | `number` | `0.55` | Monospace character width-to-height ratio used for height correction |
+| `fontAspectRatio` | `number` | `0.55` | Monospace character width-to-height ratio used for aspect correction |
 
 ---
 
-## Comparison
+### Comparison
 
 | Capability | hexpic | image-to-ascii | ascii-art | Generic Canvas Filters |
 |---|:---:|:---:|:---:|:---:|
-| Client-side execution | Yes (browser Canvas) | No (Node.js runtime required) | No (CLI / server focused) | Yes |
-| Declarative `<img data-hexpic>` | Yes | No | No | Varies |
-| Error-diffusion dithering | Atkinson, Floyd-Steinberg, JJN, Stucki | No | Basic | N/A |
-| Edge detection & sharpening | Built-in 3x3 convolution | No | No | Requires extra libraries |
-| Monospace aspect correction | Automatic (`fontAspectRatio: 0.55`) | Manual calculation | Inconsistent | N/A |
-| Color output | TrueColor 24-bit HTML | ANSI terminal codes | ANSI / HTML strings | Raster RGB |
-| React component & hook | Yes (`<HexPicImage />`, `useHexPic`) | No | No | Component only |
-| Export utilities | Clipboard, `.txt`, Canvas PNG | Stream pipe | Console output | Canvas download |
+| Client-Side Browser | Yes | No (Node only) | No (CLI only) | Yes |
+| GitHub Action Native | Yes (`action.yml`) | No | No | No |
+| Standalone CLI | Yes (`npx hexpic`) | Yes | Yes | No |
+| MCP Agent Server | Yes (`hexpic-mcp`) | No | No | No |
+| TrueColor SVG Export | Yes | No | No | No |
+| Error-Diffusion Dithering | Atkinson, Floyd-Steinberg, JJN, Stucki | No | Basic | No |
+| 3x3 Edge Convolutions | Built-in Sobel & Unsharp | No | No | External |
+| Monospace Aspect Fix | Automatic (`0.55`) | Manual | Inconsistent | No |
+| React Components | `<HexPicImage />`, `useHexPic` | No | No | Varies |
 
 ---
 
-## License
+### License
 
-MIT
+MIT © Daniel Kinnito
