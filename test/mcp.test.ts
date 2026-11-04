@@ -57,6 +57,18 @@ describe('MCP Tools', () => {
       expect(result.content[0].text).toBeDefined();
     });
 
+    it('should support format: "svg" for Markdown embeds', async () => {
+      const result = await handleConvertImage({
+        source: samplePngPath,
+        width: 20,
+        format: 'svg'
+      });
+
+      expect(result.content[0].text).toContain('### SVG Output');
+      expect(result.content[0].text).toContain('<svg xmlns="http://www.w3.org/2000/svg"');
+      expect(result.content[0].text).toContain('</svg>');
+    });
+
     it('should return helpful self-healing error message if file does not exist', async () => {
       await expect(handleConvertImage({ source: './missing.png' })).rejects.toThrow(
         /Local image file does not exist/

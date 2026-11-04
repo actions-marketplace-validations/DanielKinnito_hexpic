@@ -20,7 +20,8 @@ export const convertImageSchema = {
   sharpness: z.number().min(1).max(20).optional().describe('Sharpening weight (1-20). Default: 9.'),
   contrast: z.number().min(0).max(300).optional().describe('Contrast percentage (100 is normal). Default: 100.'),
   brightness: z.number().min(0).max(300).optional().describe('Brightness percentage (100 is normal). Default: 100.'),
-  invert: z.boolean().optional().describe('Invert brightness. Default: false.')
+  invert: z.boolean().optional().describe('Invert brightness. Default: false.'),
+  format: z.enum(['text', 'html', 'svg']).optional().describe('Output format ("text", "html", or "svg" for embedding in Markdown). Default: "text".')
 };
 
 export const analyzeSpatialLayoutSchema = {
@@ -43,6 +44,7 @@ export interface ConvertImageArgs {
   contrast?: number;
   brightness?: number;
   invert?: boolean;
+  format?: 'text' | 'html' | 'svg';
 }
 
 export interface AnalyzeSpatialLayoutArgs {
@@ -95,6 +97,10 @@ export async function handleConvertImage(args: ConvertImageArgs): Promise<McpToo
 
   if (args.colorMode === 'color') {
     outputMarkdown.push('', '### HTML Output', '```html', result.html, '```');
+  }
+
+  if (args.format === 'svg') {
+    outputMarkdown.push('', '### SVG Output (Embeddable in Markdown)', '```xml', result.toSvg(), '```');
   }
 
   return {
