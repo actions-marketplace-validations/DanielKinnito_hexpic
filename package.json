@@ -67,9 +67,6 @@
   "peerDependencies": {
     "react": ">=16.8.0"
   },
-  "optionalDependencies": {
-    "canvas": "^2.11.2"
-  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.2",
     "jpeg-js": "^0.4.4",

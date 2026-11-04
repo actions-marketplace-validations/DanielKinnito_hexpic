@@ -71,58 +71,71 @@ runs:
       shell: bash
       env:
         GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+        INPUT_IMAGE: ${{ inputs.image }}
+        INPUT_OUTPUT: ${{ inputs.output }}
+        INPUT_WIDTH: ${{ inputs.width }}
+        INPUT_HEIGHT: ${{ inputs.height }}
+        INPUT_COLOR_MODE: ${{ inputs.color-mode }}
+        INPUT_DITHERING: ${{ inputs.dithering }}
+        INPUT_CHARSET: ${{ inputs.charset }}
+        INPUT_FONT_SIZE: ${{ inputs.font-size }}
+        INPUT_BG_COLOR: ${{ inputs.bg-color }}
+        INPUT_FG_COLOR: ${{ inputs.fg-color }}
+        INPUT_CONTRAST: ${{ inputs.contrast }}
+        INPUT_BRIGHTNESS: ${{ inputs.brightness }}
+        INPUT_INVERT: ${{ inputs.invert }}
       run: |
         ARGS=()
 
-        if [ -n "${{ inputs.image }}" ]; then
-          ARGS+=("${{ inputs.image }}")
+        if [ -n "$INPUT_IMAGE" ]; then
+          ARGS+=("$INPUT_IMAGE")
         fi
 
-        if [ -n "${{ inputs.output }}" ]; then
-          ARGS+=("-o" "${{ inputs.output }}")
+        if [ -n "$INPUT_OUTPUT" ]; then
+          ARGS+=("-o" "$INPUT_OUTPUT")
         fi
 
-        if [ -n "${{ inputs.width }}" ]; then
-          ARGS+=("-w" "${{ inputs.width }}")
+        if [ -n "$INPUT_WIDTH" ]; then
+          ARGS+=("-w" "$INPUT_WIDTH")
         fi
 
-        if [ -n "${{ inputs.height }}" ]; then
-          ARGS+=("--height" "${{ inputs.height }}")
+        if [ -n "$INPUT_HEIGHT" ]; then
+          ARGS+=("--height" "$INPUT_HEIGHT")
         fi
 
-        if [ -n "${{ inputs.color-mode }}" ]; then
-          ARGS+=("-c" "${{ inputs.color-mode }}")
+        if [ -n "$INPUT_COLOR_MODE" ]; then
+          ARGS+=("-c" "$INPUT_COLOR_MODE")
         fi
 
-        if [ -n "${{ inputs.dithering }}" ]; then
-          ARGS+=("-d" "${{ inputs.dithering }}")
+        if [ -n "$INPUT_DITHERING" ]; then
+          ARGS+=("-d" "$INPUT_DITHERING")
         fi
 
-        if [ -n "${{ inputs.charset }}" ]; then
-          ARGS+=("--charset" "${{ inputs.charset }}")
+        if [ -n "$INPUT_CHARSET" ]; then
+          ARGS+=("--charset" "$INPUT_CHARSET")
         fi
 
-        if [ -n "${{ inputs.font-size }}" ]; then
-          ARGS+=("--font-size" "${{ inputs.font-size }}")
+        if [ -n "$INPUT_FONT_SIZE" ]; then
+          ARGS+=("--font-size" "$INPUT_FONT_SIZE")
         fi
 
-        if [ -n "${{ inputs.bg-color }}" ]; then
-          ARGS+=("--bg" "${{ inputs.bg-color }}")
+        if [ -n "$INPUT_BG_COLOR" ]; then
+          ARGS+=("--bg" "$INPUT_BG_COLOR")
         fi
 
-        if [ -n "${{ inputs.fg-color }}" ]; then
-          ARGS+=("--fg" "${{ inputs.fg-color }}")
+        if [ -n "$INPUT_FG_COLOR" ]; then
+          ARGS+=("--fg" "$INPUT_FG_COLOR")
         fi
 
-        if [ -n "${{ inputs.contrast }}" ]; then
-          ARGS+=("--contrast" "${{ inputs.contrast }}")
+        if [ -n "$INPUT_CONTRAST" ]; then
+          ARGS+=("--contrast" "$INPUT_CONTRAST")
         fi
 
-        if [ -n "${{ inputs.brightness }}" ]; then
-          ARGS+=("--brightness" "${{ inputs.brightness }}")
+        if [ -n "$INPUT_BRIGHTNESS" ]; then
+          ARGS+=("--brightness" "$INPUT_BRIGHTNESS")
         fi
 
-        if [ "${{ inputs.invert }}" = "true" ]; then
+        if [ "$INPUT_INVERT" = "true" ]; then
           ARGS+=("--invert")
         fi
 

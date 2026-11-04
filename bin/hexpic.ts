@@ -2,7 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import { HexPic } from '../src/HexPic';
-import { decodeImageBuffer } from '../src/node/imageDecoder';
+import { decodeImageBuffer, resolveImageSource } from '../src/node/imageDecoder';
 import { ColorMode, DitheringMode } from '../src/types';
 
 export interface CliOptions {
@@ -161,28 +161,7 @@ export async function runCli(argv: string[], env: NodeJS.ProcessEnv = process.en
   // Load image buffer
   let buffer: Buffer;
   try {
-    if (inputSource.startsWith('http://') || inputSource.startsWith('https://')) {
-      const resp = await fetch(inputSource);
-      if (!resp.ok) {
-        return {
-          code: 1,
-          stdout: '',
-          stderr: `Error: Failed to fetch image from ${inputSource} (HTTP ${resp.status} ${resp.statusText})`
-        };
-      }
-      const arr = await resp.arrayBuffer();
-      buffer = Buffer.from(arr);
-    } else {
-      const resolved = path.resolve(process.cwd(), inputSource);
-      if (!fs.existsSync(resolved)) {
-        return {
-          code: 1,
-          stdout: '',
-          stderr: `Error: Image file not found: ${resolved}`
-        };
-      }
-      buffer = fs.readFileSync(resolved);
-    }
+    buffer = await resolveImageSource(inputSource);
   } catch (err: any) {
     return {
       code: 1,

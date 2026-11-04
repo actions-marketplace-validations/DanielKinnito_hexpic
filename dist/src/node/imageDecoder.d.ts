@@ -3,6 +3,9 @@ export interface DecodedImage {
     width: number;
     height: number;
 }
+export declare const MAX_IMAGE_BUFFER_BYTES: number;
+export declare const MAX_IMAGE_PIXELS = 25000000;
+export declare const DEFAULT_FETCH_TIMEOUT_MS = 15000;
 /**
  * Decodes an image Buffer (PNG or JPEG) into raw RGBA pixel data.
  */

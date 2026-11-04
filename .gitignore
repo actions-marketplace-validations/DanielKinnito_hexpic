@@ -427,5 +427,7 @@ jest-environment-jsdom.config.ts
 jest-environment-jsdom.config.tsx
 
 
+.agents/
 .agents
+skills-lock.json
 docs/superpowers

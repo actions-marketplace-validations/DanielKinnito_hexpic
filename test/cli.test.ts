@@ -110,7 +110,7 @@ describe('HexPic CLI (bin/hexpic.ts)', () => {
         { GITHUB_REPOSITORY_OWNER: 'testowner' }
       );
       expect(res.code).toBe(0);
-      expect(globalThis.fetch).toHaveBeenCalledWith('https://github.com/testowner.png');
+      expect(globalThis.fetch).toHaveBeenCalledWith('https://github.com/testowner.png', expect.anything());
       expect(fs.existsSync(outputSvgPath)).toBe(true);
     } finally {
       globalThis.fetch = originalFetch;

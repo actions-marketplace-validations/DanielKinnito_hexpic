@@ -247,7 +247,8 @@ function applySimpleThresholding(data, width, height, threshold) {
  * Renders ASCII text into clean HTML, grouping adjacent characters with identical colors.
  */
 function renderColorHtml(lines, colors, backgroundColor = '#000000') {
-    let html = `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${backgroundColor}; margin: 0; padding: 0;">`;
+    const safeBg = escapeHtml$1(backgroundColor);
+    let html = `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${safeBg}; margin: 0; padding: 0;">`;
     for (let y = 0; y < lines.length; y++) {
         const lineChars = lines[y];
         const rowColors = colors[y] || [];
@@ -256,7 +257,7 @@ function renderColorHtml(lines, colors, backgroundColor = '#000000') {
         for (let x = 0; x < lineChars.length; x++) {
             const char = lineChars[x];
             const color = rowColors[x] ? `rgb(${rowColors[x].r},${rowColors[x].g},${rowColors[x].b})` : 'inherit';
-            const escapedChar = char === '&' ? '&amp;' : char === '<' ? '&lt;' : char === '>' ? '&gt;' : char;
+            const escapedChar = escapeHtml$1(char);
             if (color !== currentColor) {
                 if (buffer) {
                     html += currentColor === 'inherit' ? buffer : `<span style="color:${currentColor}">${buffer}</span>`;
@@ -366,6 +367,9 @@ function loadImage(url) {
         img.src = url;
     });
 }
+/**
+ * Escapes characters for safe inclusion in XML/SVG documents.
+ */
 function escapeXml(str) {
     return str.replace(/[&<>"']/g, (m) => {
         switch (m) {
@@ -379,13 +383,31 @@ function escapeXml(str) {
     });
 }
 /**
+ * Escapes characters for safe inclusion in HTML documents and attributes.
+ */
+function escapeHtml$1(str) {
+    return str.replace(/[&<>"']/g, (m) => {
+        switch (m) {
+            case '&': return '&amp;';
+            case '<': return '&lt;';
+            case '>': return '&gt;';
+            case '"': return '&quot;';
+            case '\'': return '&#39;';
+            default: return m;
+        }
+    });
+}
+/**
  * Converts ASCII text (and optional character colors) into a scalable, responsive SVG string.
  */
 function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#ffffff') {
+    const safeFontSize = Number.isFinite(fontSize) && fontSize > 0 ? fontSize : 12;
+    const safeBg = escapeXml(bg);
+    const safeFg = escapeXml(fg);
     const lines = ascii.split('\n');
     const maxLineLength = Math.max(...lines.map((l) => l.length), 1);
-    const charWidth = fontSize * 0.6;
-    const lineHeight = fontSize;
+    const charWidth = safeFontSize * 0.6;
+    const lineHeight = safeFontSize;
     const svgWidth = Math.ceil(maxLineLength * charWidth);
     const svgHeight = Math.ceil(lines.length * lineHeight);
     const textLines = [];
@@ -394,7 +416,7 @@ function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#ffffff'
         const yPos = (y + 0.85) * lineHeight;
         if (!colors || !colors[y]) {
             // Monochrome line
-            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" fill="${fg}" xml:space="preserve">${escapeXml(line)}</text>`);
+            textLines.push(`    <text x="0" y="${yPos.toFixed(2)}" fill="${safeFg}" xml:space="preserve">${escapeXml(line)}</text>`);
         }
         else {
             // Color mode line with consecutive color grouping
@@ -425,8 +447,8 @@ function asciiToSvg(ascii, colors, fontSize = 12, bg = '#000000', fg = '#ffffff'
     }
     return [
         `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${svgWidth} ${svgHeight}" width="${svgWidth}" height="${svgHeight}">`,
-        `  <rect width="100%" height="100%" fill="${bg}"/>`,
-        `  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="${fontSize}px" letter-spacing="0">`,
+        `  <rect width="100%" height="100%" fill="${safeBg}"/>`,
+        `  <g font-family="ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace" font-size="${safeFontSize}px" letter-spacing="0">`,
         textLines.join('\n'),
         `  </g>`,
         `</svg>`
@@ -688,29 +710,31 @@ class HexPic {
         const currentOptions = { ...this.options, ...options };
         const { width: targetWidth, height: targetHeight, preserveAspectRatio, fontAspectRatio, transparentFrame, useEdgeDetection, edgeIntensity, invertEdgeColors, useSharpen, sharpness, contrast, brightness, grayscale, invert } = currentOptions;
         // Calculate dimensions
+        const safeTargetWidth = Math.max(1, Math.min(2000, Math.floor(Number.isFinite(targetWidth) ? targetWidth : 80)));
+        const safeTargetHeight = Math.max(1, Math.min(2000, Math.floor(Number.isFinite(targetHeight) ? targetHeight : 40)));
         const isExplicitHeight = (options === null || options === void 0 ? void 0 : options.height) !== undefined && options.height > 0;
-        let width = targetWidth;
-        let height = isExplicitHeight ? targetHeight : 0;
+        let width = safeTargetWidth;
+        let height = isExplicitHeight ? safeTargetHeight : 0;
         if (!preserveAspectRatio && isExplicitHeight) {
-            width = targetWidth;
-            height = targetHeight;
+            width = safeTargetWidth;
+            height = safeTargetHeight;
         }
         else {
             const imageAspect = (sourceWidth || 1) / (sourceHeight || 1);
             const correctedAspect = imageAspect / fontAspectRatio;
             if (isExplicitHeight && preserveAspectRatio) {
-                if (targetWidth / targetHeight > correctedAspect) {
-                    width = Math.max(1, Math.floor(targetHeight * correctedAspect));
-                    height = targetHeight;
+                if (safeTargetWidth / safeTargetHeight > correctedAspect) {
+                    width = Math.max(1, Math.floor(safeTargetHeight * correctedAspect));
+                    height = safeTargetHeight;
                 }
                 else {
-                    width = targetWidth;
-                    height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+                    width = safeTargetWidth;
+                    height = Math.max(1, Math.floor(safeTargetWidth / correctedAspect));
                 }
             }
             else {
-                width = targetWidth;
-                height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+                width = safeTargetWidth;
+                height = Math.max(1, Math.floor(safeTargetWidth / correctedAspect));
             }
         }
         const frame = Math.max(0, transparentFrame);
@@ -884,9 +908,11 @@ class HexPic {
                 colors.push(rowColors);
         }
         const ascii = lines.join('\n');
+        const safeBg = escapeHtml(backgroundColor);
+        const safeFg = escapeHtml(textColor);
         const html = isColor
-            ? renderColorHtml(lines, colors, backgroundColor)
-            : `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${backgroundColor}; color: ${textColor}; margin: 0; padding: 0;">${escapeHtml(ascii)}</pre>`;
+            ? renderColorHtml(lines, colors, safeBg)
+            : `<pre style="font-family: monospace; white-space: pre; line-height: 1em; background-color: ${safeBg}; color: ${safeFg}; margin: 0; padding: 0;">${escapeHtml(ascii)}</pre>`;
         return {
             ascii,
             html,
@@ -943,10 +969,24 @@ class HexPic {
     }
 }
 
+const MAX_IMAGE_BUFFER_BYTES = 25 * 1024 * 1024; // 25 MB
+const MAX_IMAGE_PIXELS = 25000000; // 25 megapixels (e.g. 5000x5000)
+const DEFAULT_FETCH_TIMEOUT_MS = 15000; // 15 seconds
+function validateImageDimensions(width, height) {
+    if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+        throw new Error(`Invalid image dimensions: ${width}x${height}`);
+    }
+    if (width * height > MAX_IMAGE_PIXELS) {
+        throw new Error(`Image dimensions (${width}x${height} = ${width * height} pixels) exceed safety limit of ${MAX_IMAGE_PIXELS} pixels to prevent memory exhaustion.`);
+    }
+}
 /**
  * Decodes an image Buffer (PNG or JPEG) into raw RGBA pixel data.
  */
 function decodeImageBuffer(buffer) {
+    if (buffer.length > MAX_IMAGE_BUFFER_BYTES) {
+        throw new Error(`Image buffer (${(buffer.length / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 25MB.`);
+    }
     // Check PNG signature: 89 50 4E 47 0D 0A 1A 0A
     if (buffer.length >= 8 &&
         buffer[0] === 0x89 &&
@@ -955,6 +995,7 @@ function decodeImageBuffer(buffer) {
         buffer[3] === 0x47) {
         try {
             const png = pngjs.PNG.sync.read(buffer);
+            validateImageDimensions(png.width, png.height);
             return {
                 data: new Uint8ClampedArray(png.data),
                 width: png.width,
@@ -972,6 +1013,7 @@ function decodeImageBuffer(buffer) {
         buffer[2] === 0xff) {
         try {
             const decoded = jpeg.decode(buffer, { useTArray: true, formatAsRGBA: true });
+            validateImageDimensions(decoded.width, decoded.height);
             return {
                 data: new Uint8ClampedArray(decoded.data),
                 width: decoded.width,
@@ -985,6 +1027,7 @@ function decodeImageBuffer(buffer) {
     // Fallback try PNG
     try {
         const png = pngjs.PNG.sync.read(buffer);
+        validateImageDimensions(png.width, png.height);
         return {
             data: new Uint8ClampedArray(png.data),
             width: png.width,
@@ -995,6 +1038,7 @@ function decodeImageBuffer(buffer) {
         // Fallback try JPEG
         try {
             const decoded = jpeg.decode(buffer, { useTArray: true, formatAsRGBA: true });
+            validateImageDimensions(decoded.width, decoded.height);
             return {
                 data: new Uint8ClampedArray(decoded.data),
                 width: decoded.width,
@@ -1005,6 +1049,63 @@ function decodeImageBuffer(buffer) {
             throw new Error('Unsupported or corrupted image format. Expected PNG or JPEG buffer.');
         }
     }
+}
+/**
+ * Resolves an image input string (file path, data URI, or URL) into a raw Buffer.
+ */
+async function resolveImageSource(source) {
+    var _a;
+    const trimmed = source.trim();
+    // 1. Data URI
+    if (trimmed.startsWith('data:')) {
+        const matches = trimmed.match(/^data:image\/[a-zA-Z+.-]+;base64,(.+)$/);
+        if (!matches || !matches[1]) {
+            throw new Error('Invalid data URI format. Expected "data:image/<type>;base64,<data>".');
+        }
+        if (matches[1].length > MAX_IMAGE_BUFFER_BYTES * 1.4) {
+            throw new Error('Data URI payload exceeds maximum allowed size of 25MB.');
+        }
+        return Buffer.from(matches[1], 'base64');
+    }
+    // 2. HTTP(S) URL
+    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), DEFAULT_FETCH_TIMEOUT_MS);
+        try {
+            const res = await fetch(trimmed, { signal: controller.signal });
+            if (!res.ok) {
+                throw new Error(`Failed to fetch image from URL: ${res.status} ${res.statusText}`);
+            }
+            const contentLength = ((_a = res.headers) === null || _a === void 0 ? void 0 : _a.get) ? res.headers.get('content-length') : null;
+            if (contentLength && parseInt(contentLength, 10) > MAX_IMAGE_BUFFER_BYTES) {
+                throw new Error(`Remote image (${contentLength} bytes) exceeds maximum allowed size of 25MB.`);
+            }
+            const arrayBuf = await res.arrayBuffer();
+            if (arrayBuf.byteLength > MAX_IMAGE_BUFFER_BYTES) {
+                throw new Error(`Remote image (${arrayBuf.byteLength} bytes) exceeds maximum allowed size of 25MB.`);
+            }
+            return Buffer.from(arrayBuf);
+        }
+        catch (err) {
+            if (err.name === 'AbortError') {
+                throw new Error(`Image fetch request timed out after ${DEFAULT_FETCH_TIMEOUT_MS / 1000} seconds.`);
+            }
+            throw err;
+        }
+        finally {
+            clearTimeout(timer);
+        }
+    }
+    // 3. Local file path
+    const resolvedPath = path.isAbsolute(trimmed) ? trimmed : path.resolve(process.cwd(), trimmed);
+    if (!fs.existsSync(resolvedPath)) {
+        throw new Error(`Local image file does not exist (not found) at path: "${trimmed}" (resolved to: "${resolvedPath}")`);
+    }
+    const stat = await fs.promises.stat(resolvedPath);
+    if (stat.size > MAX_IMAGE_BUFFER_BYTES) {
+        throw new Error(`Local image file (${(stat.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of 25MB.`);
+    }
+    return fs.promises.readFile(resolvedPath);
 }
 
 const HELP_TEXT = `
@@ -1148,29 +1249,7 @@ async function runCli(argv, env = process.env) {
     // Load image buffer
     let buffer;
     try {
-        if (inputSource.startsWith('http://') || inputSource.startsWith('https://')) {
-            const resp = await fetch(inputSource);
-            if (!resp.ok) {
-                return {
-                    code: 1,
-                    stdout: '',
-                    stderr: `Error: Failed to fetch image from ${inputSource} (HTTP ${resp.status} ${resp.statusText})`
-                };
-            }
-            const arr = await resp.arrayBuffer();
-            buffer = Buffer.from(arr);
-        }
-        else {
-            const resolved = path.resolve(process.cwd(), inputSource);
-            if (!fs.existsSync(resolved)) {
-                return {
-                    code: 1,
-                    stdout: '',
-                    stderr: `Error: Image file not found: ${resolved}`
-                };
-            }
-            buffer = fs.readFileSync(resolved);
-        }
+        buffer = await resolveImageSource(inputSource);
     }
     catch (err) {
         return {

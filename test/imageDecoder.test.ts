@@ -89,6 +89,16 @@ describe('imageDecoder (Node headless)', () => {
         /Local image file does not exist/
       );
     });
+
+    it('should reject oversized data URIs exceeding 25MB limit', async () => {
+      const hugeDataUri = 'data:image/png;base64,' + 'A'.repeat(36 * 1024 * 1024);
+      await expect(resolveImageSource(hugeDataUri)).rejects.toThrow(/exceeds maximum/i);
+    });
+
+    it('should reject raw image buffers exceeding 25MB', () => {
+      const hugeBuffer = Buffer.alloc(26 * 1024 * 1024);
+      expect(() => decodeImageBuffer(hugeBuffer)).toThrow(/exceeds maximum limit/i);
+    });
   });
 });
 

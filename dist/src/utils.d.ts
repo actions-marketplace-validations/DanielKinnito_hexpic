@@ -78,6 +78,14 @@ export declare function copyTextToClipboard(text: string): Promise<void>;
  */
 export declare function loadImage(url: string): Promise<HTMLImageElement>;
 /**
+ * Escapes characters for safe inclusion in XML/SVG documents.
+ */
+export declare function escapeXml(str: string): string;
+/**
+ * Escapes characters for safe inclusion in HTML documents and attributes.
+ */
+export declare function escapeHtml(str: string): string;
+/**
  * Converts ASCII text (and optional character colors) into a scalable, responsive SVG string.
  */
 export declare function asciiToSvg(ascii: string, colors?: CharColor[][], fontSize?: number, bg?: string, fg?: string): string;

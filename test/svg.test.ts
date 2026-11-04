@@ -45,5 +45,18 @@ describe('asciiToSvg', () => {
     expect(svg).toContain('fill="rgb(255,0,0)">AAA</tspan>');
     expect(svg).toContain('fill="rgb(0,255,0)">BBB</tspan>');
   });
+
+  it('should escape malicious XSS payloads in bg and fg parameters', () => {
+    const maliciousPayload = '"><script>alert(1)</script><rect fill="';
+    const svg = asciiToSvg('test', undefined, 12, maliciousPayload, maliciousPayload);
+
+    expect(svg).not.toContain('<script>');
+    expect(svg).toContain('&quot;&gt;&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+
+  it('should safely clamp invalid font-size values', () => {
+    const svg = asciiToSvg('test', undefined, -10);
+    expect(svg).toContain('font-size="12px"');
+  });
 });
 
