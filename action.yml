@@ -1,0 +1,129 @@
+name: 'HexPic ASCII Art Generator'
+description: 'Generate crisp vector ASCII art SVGs for your GitHub profile README and docs'
+author: 'Daniel Kinnito'
+branding:
+  icon: 'image'
+  color: 'purple'
+
+inputs:
+  image:
+    description: 'Image path or remote URL. Defaults to the repository owner avatar (https://github.com/<owner>.png)'
+    required: false
+    default: ''
+  output:
+    description: 'Output SVG file path'
+    required: false
+    default: './assets/hexpic.svg'
+  width:
+    description: 'Character width in columns'
+    required: false
+    default: '70'
+  height:
+    description: 'Character height in rows (optional, defaults to automatic aspect ratio)'
+    required: false
+    default: ''
+  color-mode:
+    description: 'Color mode: color or monochrome'
+    required: false
+    default: 'color'
+  dithering:
+    description: 'Dithering algorithm: atkinson, floyd-steinberg, bayer, halftone, random, or none'
+    required: false
+    default: 'atkinson'
+  charset:
+    description: 'Charset preset (normal, minimalist, alphabetic, numerical, extended, math, braille) or custom string'
+    required: false
+    default: 'normal'
+  font-size:
+    description: 'Monospace font size in pixels for SVG rendering'
+    required: false
+    default: '12'
+  bg-color:
+    description: 'Background color hex for SVG'
+    required: false
+    default: '#000000'
+  fg-color:
+    description: 'Foreground text color hex for monochrome SVG'
+    required: false
+    default: '#ffffff'
+  contrast:
+    description: 'Contrast percentage (e.g. 100)'
+    required: false
+    default: '100'
+  brightness:
+    description: 'Brightness percentage (e.g. 100)'
+    required: false
+    default: '100'
+  invert:
+    description: 'Invert brightness (true or false)'
+    required: false
+    default: 'false'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Run HexPic CLI
+      shell: bash
+      env:
+        GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
+      run: |
+        ARGS=()
+
+        if [ -n "${{ inputs.image }}" ]; then
+          ARGS+=("${{ inputs.image }}")
+        fi
+
+        if [ -n "${{ inputs.output }}" ]; then
+          ARGS+=("-o" "${{ inputs.output }}")
+        fi
+
+        if [ -n "${{ inputs.width }}" ]; then
+          ARGS+=("-w" "${{ inputs.width }}")
+        fi
+
+        if [ -n "${{ inputs.height }}" ]; then
+          ARGS+=("--height" "${{ inputs.height }}")
+        fi
+
+        if [ -n "${{ inputs.color-mode }}" ]; then
+          ARGS+=("-c" "${{ inputs.color-mode }}")
+        fi
+
+        if [ -n "${{ inputs.dithering }}" ]; then
+          ARGS+=("-d" "${{ inputs.dithering }}")
+        fi
+
+        if [ -n "${{ inputs.charset }}" ]; then
+          ARGS+=("--charset" "${{ inputs.charset }}")
+        fi
+
+        if [ -n "${{ inputs.font-size }}" ]; then
+          ARGS+=("--font-size" "${{ inputs.font-size }}")
+        fi
+
+        if [ -n "${{ inputs.bg-color }}" ]; then
+          ARGS+=("--bg" "${{ inputs.bg-color }}")
+        fi
+
+        if [ -n "${{ inputs.fg-color }}" ]; then
+          ARGS+=("--fg" "${{ inputs.fg-color }}")
+        fi
+
+        if [ -n "${{ inputs.contrast }}" ]; then
+          ARGS+=("--contrast" "${{ inputs.contrast }}")
+        fi
+
+        if [ -n "${{ inputs.brightness }}" ]; then
+          ARGS+=("--brightness" "${{ inputs.brightness }}")
+        fi
+
+        if [ "${{ inputs.invert }}" = "true" ]; then
+          ARGS+=("--invert")
+        fi
+
+        node "${{ github.action_path }}/dist/bin/hexpic.js" "${ARGS[@]}"
