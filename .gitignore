@@ -106,7 +106,7 @@ typings/
 .pnp.*
 
 # jest
-jest.config.js
+# jest.config.js
 jest.setup.js
 jest.setup.ts
 jest.setup.tsx
@@ -301,7 +301,7 @@ typings/
 .pnp.*
 
 # jest
-jest.config.js
+# jest.config.js
 jest.setup.js
 jest.setup.ts
 jest.setup.tsx
@@ -415,7 +415,7 @@ typings/
 .pnp.*
 
 # jest
-jest.config.js
+# jest.config.js
 jest.setup.js
 jest.setup.ts
 jest.setup.tsx
