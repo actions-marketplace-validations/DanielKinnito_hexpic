@@ -1,0 +1,1 @@
+{"version":3,"file":"imageDecoder.d.ts","sourceRoot":"","sources":["../../../src/node/imageDecoder.ts"],"names":[],"mappings":"AAKA,MAAM,WAAW,YAAY;IAC3B,IAAI,EAAE,iBAAiB,CAAC;IACxB,KAAK,EAAE,MAAM,CAAC;IACd,MAAM,EAAE,MAAM,CAAC;CAChB;AAED;;GAEG;AACH,wBAAgB,iBAAiB,CAAC,MAAM,EAAE,MAAM,GAAG,YAAY,CA6D9D;AAED;;GAEG;AACH,wBAAsB,kBAAkB,CAAC,MAAM,EAAE,MAAM,GAAG,OAAO,CAAC,MAAM,CAAC,CA6BxE"}

@@ -52,6 +52,7 @@ export interface AnalyzeSpatialLayoutArgs {
 }
 
 export interface McpToolResponse {
+  [x: string]: unknown;
   content: Array<{
     type: 'text';
     text: string;
@@ -119,9 +120,9 @@ export async function handleAnalyzeSpatialLayout(args: AnalyzeSpatialLayoutArgs)
     width,
     useEdgeDetection: true,
     edgeIntensity: args.edgeIntensity ?? 1.2,
-    invertEdgeColors: false,
-    charset: ' .:-=+*#%@',
-    spaceDensity: 1
+    invertEdgeColors: true,
+    charset: 'normal',
+    spaceDensity: 2
   });
 
   const rows = result.ascii.split('\n');
