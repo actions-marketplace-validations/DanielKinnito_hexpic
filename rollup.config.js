@@ -55,6 +55,10 @@ export default [
       commonjs(),
       typescript({
         tsconfig: './tsconfig.json',
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+        },
         exclude: ['**/*.test.ts'],
       }),
     ],
@@ -83,6 +87,10 @@ export default [
       commonjs(),
       typescript({
         tsconfig: './tsconfig.json',
+        compilerOptions: {
+          declaration: false,
+          declarationMap: false,
+        },
         exclude: ['**/*.test.ts'],
       }),
     ],
