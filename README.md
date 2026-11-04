@@ -17,6 +17,8 @@ Processes images directly on the client using the HTML5 Canvas API without exter
 - **Negative space padding**: Configurable whitespace density to suppress stray punctuation marks on light or uniform backgrounds.
 - **Aspect ratio correction**: Built-in `0.55` font aspect ratio scaler to counter vertical stretching inherent to monospace typefaces.
 - **Framework and runtime support**: Native ES modules (Vite, Next.js, Remix, Astro), CommonJS, UMD script tag, and React components (`<HexPicImage />`, `useHexPic`).
+- **Model Context Protocol (MCP) Server**: Built-in stdio server (`hexpic-mcp`) allowing AI agents (Claude Desktop, Cursor, Antigravity) to drive image conversion and spatial composition analysis.
+- **Headless Node engine**: Pure JavaScript image decoders for PNG and JPEG without native build dependencies or DOM requirements.
 - **Export helpers**: Utilities for clipboard copying, `.txt` file generation, and raster PNG rendering via offscreen canvas.
 
 ---
@@ -139,6 +141,28 @@ export function Editor() {
   );
 }
 ```
+
+### Model Context Protocol (MCP) Server
+
+HexPic provides an official MCP server enabling AI agents (Claude Desktop, Cursor, Antigravity) to convert images and inspect spatial composition via stdio.
+
+Add to your MCP client configuration (e.g. `claude_desktop_config.json`):
+
+```json
+{
+  "mcpServers": {
+    "hexpic": {
+      "command": "npx",
+      "args": ["-y", "hexpic-mcp"]
+    }
+  }
+}
+```
+
+#### Available MCP Tools:
+- `convert_image`: Convert any image file, URL, or base64 data URI to ASCII with dithering and edge options.
+- `analyze_spatial_layout`: Extract visual edge contours and quadrant density percentages for token-efficient vision understanding.
+- `get_presets`: Retrieve all available character palettes and dithering algorithms.
 
 ---
 

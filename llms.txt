@@ -1,0 +1,26 @@
+# hexpic
+
+> High-performance TypeScript library, headless Node engine, and Model Context Protocol (MCP) server for converting raster graphics into studio-quality ASCII art and visual layout contour maps using error-diffusion dithering (Atkinson, Floyd-Steinberg, JJN, Stucki) and 3x3 Sobel/unsharp convolutions.
+
+HexPic runs in both browser and headless Node.js environments. In the browser, it renders via HTML5 Canvas or declarative `<img data-hexpic>`. In headless Node.js and MCP environments, it decodes PNG and JPEG buffers in pure JavaScript without requiring native compilation or GUI display servers.
+
+When operating as an AI tool or MCP server, HexPic enables models to inspect, summarize, and render visual content in dense character grids without consuming expensive image vision tokens. Monospace typefaces have an inherent aspect ratio of approximately 0.55 (characters are taller than wide); HexPic automatically counters this vertical stretching unless `preserveAspectRatio: false` is explicitly passed.
+
+## Core Capabilities
+
+- [TypeScript API](./README.md#typescript--javascript-api): Client and headless Node API for converting images from URLs, files, or raw pixel buffers (`fromPixels`).
+- [MCP Server Tools](./README.md#model-context-protocol-mcp): Official stdio server exposing `convert_image`, `analyze_spatial_layout`, and `get_presets`.
+- [Dithering Routines](./README.md#features): Atkinson, Floyd-Steinberg, Jarvis-Judice-Ninke, and Stucki error diffusion algorithms.
+- [Convolution Filters](./README.md#features): 3x3 Sobel edge detection and unsharp masking sharpen kernels.
+- [React Components](./README.md#react--nextjs): SSR-safe `<HexPicImage />` and reactive `useHexPic` hook.
+
+## MCP Tools Reference
+
+- [convert_image](./README.md#mcp-tools): Converts local files, HTTP URLs, or base64 data URIs into formatted ASCII character grids or TrueColor HTML.
+- [analyze_spatial_layout](./README.md#mcp-tools): Runs Sobel edge extraction to return an ASCII outline contour map and quadrant density distribution report.
+- [get_presets](./README.md#mcp-tools): Returns built-in character palettes (`normal`, `blockelement`, `codepage437`, `braille`, `math`, `minimalist`) and algorithm recommendations.
+
+## Optional
+
+- [Live Demo](https://danielkinnito.github.io/hexpic/): Interactive browser studio for tuning dithering, contrast, and palettes in real time.
+- [Evaluation Suite](./evals/): Automated benchmarks measuring tool-calling validity, parameter recovery, and contour fidelity.
