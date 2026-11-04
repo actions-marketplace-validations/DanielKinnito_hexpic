@@ -3,46 +3,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HexPic — Image to ASCII Converter</title>
-  <link rel="stylesheet" href="style.css?v=2.0.2">
-  <style>
-    body { background-color: #0b0d13; color: #f1f5f9; }
-  </style>
+  <title>HexPic — High-Performance Image to ASCII & SVG Studio</title>
+  <link rel="stylesheet" href="style.css?v=3.0.0">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="logo-group">
-        <div class="logo">HexPic</div>
-        <span class="badge">v0.2.0</span>
+  <!-- Sticky Frosted Header -->
+  <header>
+    <div class="logo-group">
+      <div class="logo">
+        <span class="logo-icon">#</span>
+        <span>HexPic</span>
       </div>
-      <nav>
-        <a href="#studio">Studio</a>
-        <a href="#quickstart">Quickstart</a>
-        <a href="https://github.com/DanielKinnito/hexpic" target="_blank" rel="noopener">GitHub</a>
-      </nav>
-    </header>
+      <span class="badge">v0.2.0</span>
+    </div>
+    <nav>
+      <a href="#studio">Studio</a>
+      <a href="#quickstart">Quickstart</a>
+      <a href="https://github.com/DanielKinnito/hexpic" target="_blank" rel="noopener" class="nav-cta">
+        <span>GitHub</span>
+        <span style="font-size: 0.75rem; opacity: 0.7;">★</span>
+      </a>
+    </nav>
+  </header>
 
+  <div class="container">
+    <!-- Hero Section -->
     <div class="hero-banner">
-      <h1>Image to ASCII Converter</h1>
-      <p>In-browser conversion engine with error-diffusion dithering, edge detection, and color HTML export.</p>
+      <div class="hero-tagline">Studio-Grade ASCII & SVG Engine</div>
+      <h1>High-Performance Image to ASCII Studio</h1>
+      <p>
+        In-browser transformation engine with error-diffusion dithering, TrueColor character rendering, scalable vector SVG export for GitHub profile READMEs, and MCP agent toolkits.
+      </p>
+
+      <div class="feature-badges">
+        <span class="feature-badge"><span class="feature-badge-dot"></span>GitHub Action Automation</span>
+        <span class="feature-badge"><span class="feature-badge-dot"></span>Pure Vector SVG Export</span>
+        <span class="feature-badge"><span class="feature-badge-dot"></span>Atkinson & Floyd-Steinberg</span>
+        <span class="feature-badge"><span class="feature-badge-dot"></span>Model Context Protocol (MCP)</span>
+        <span class="feature-badge"><span class="feature-badge-dot"></span>Zero Server Latency</span>
+      </div>
+
+      <!-- 1-Click Aesthetic Presets Bar -->
+      <div class="presets-container">
+        <span class="presets-label">Style Presets:</span>
+        <button type="button" class="preset-pill active" data-preset="mac">Classic Mac '84</button>
+        <button type="button" class="preset-pill" data-preset="matrix">Cyberpunk Matrix</button>
+        <button type="button" class="preset-pill" data-preset="truecolor">TrueColor Poster</button>
+        <button type="button" class="preset-pill" data-preset="sobel">Sobel Wireframe</button>
+        <button type="button" class="preset-pill" data-preset="minimalist">Minimalist Code</button>
+      </div>
     </div>
 
+    <!-- Main Workspace Grid -->
     <div class="workspace-grid" id="studio">
       <!-- Left Sidebar: Controls -->
       <aside class="panel">
         <div class="panel-header">
-          <span>Source & Image</span>
-          <button id="btnReset" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">Reset All</button>
+          <div class="panel-title">Source & Engine Parameters</div>
+          <button id="btnReset" class="btn btn-secondary" style="padding: 0.25rem 0.6rem; font-size: 0.72rem;">Reset</button>
         </div>
 
         <!-- Drop area -->
-        <div class="drop-zone" id="dropZone" style="display: block; cursor: pointer;">
+        <div class="drop-zone" id="dropZone">
           <div class="drop-text">
-            <strong>Click to browse</strong> or drag and drop an image<br>
-            <span style="font-size: 0.8rem; color: var(--text-muted);">PNG, JPG, WebP, SVG supported</span>
+            <strong>Click to browse</strong> or drag & drop an image<br>
+            <span style="font-size: 0.75rem; color: var(--text-dim);">PNG, JPG, WebP, SVG supported</span>
           </div>
-          <button type="button" id="btnChooseFile" class="btn btn-primary" style="margin-top: 0.75rem; font-size: 0.85rem; padding: 0.4rem 0.9rem;">Choose Image File</button>
+          <button type="button" id="btnChooseFile" class="btn btn-primary" style="margin-top: 0.75rem; font-size: 0.8rem; padding: 0.35rem 0.85rem;">Choose Image File</button>
           <input type="file" id="fileInput" accept="image/*" style="display: none;">
         </div>
 
@@ -51,9 +78,9 @@
           <canvas id="previewCanvas"></canvas>
         </div>
 
-        <!-- Quality & Algorithm Section -->
+        <!-- Section 1: Quality & Algorithm -->
         <div class="control-section">
-          <div class="section-title">Quality & Dithering</div>
+          <div class="section-title"><span class="section-num">01</span> Quality & Dithering</div>
 
           <div class="form-group">
             <div class="form-label-row">
@@ -107,9 +134,9 @@
           </div>
         </div>
 
-        <!-- Dimensions & Proportions -->
+        <!-- Section 2: Dimensions & Proportions -->
         <div class="control-section">
-          <div class="section-title">Dimensions & Geometry</div>
+          <div class="section-title"><span class="section-num">02</span> Dimensions & Geometry</div>
 
           <div class="form-group">
             <div class="form-label-row">
@@ -136,7 +163,7 @@
 
           <div class="form-group">
             <div class="form-label-row">
-              <label for="fontAspectRatio">Character Aspect (Width/Height)</label>
+              <label for="fontAspectRatio">Character Aspect Ratio</label>
               <span class="val-badge" id="valFontAspectRatio">0.55</span>
             </div>
             <input type="range" id="fontAspectRatio" min="0.25" max="1.50" step="0.05" value="0.55">
@@ -152,61 +179,78 @@
 
           <div class="form-group">
             <div class="form-label-row">
-              <label for="transparentFrame">Transparent Border Frame</label>
+              <label for="transparentFrame">Border Frame</label>
               <span class="val-badge" id="valFrame">0px</span>
             </div>
-            <input type="range" id="transparentFrame" min="0" max="20" value="0">
+            <input type="range" id="transparentFrame" min="0" max="10" value="0">
           </div>
         </div>
 
-        <!-- Detail & Convolutions -->
+        <!-- Section 3: Filters & Convolution -->
         <div class="control-section">
-          <div class="section-title">Detail Enhancements</div>
+          <div class="section-title"><span class="section-num">03</span> Convolutions & Tonal Filters</div>
 
+          <!-- Edge Detection -->
           <div class="switch-row">
             <label class="switch-label">
               <input type="checkbox" id="useEdgeDetection">
-              Sobel Edge Detection
+              Sobel 3x3 Edge Detection
             </label>
-            <span class="val-badge" id="valEdge">1.0</span>
           </div>
-          <div class="form-group" id="edgeControls" style="display: none;">
-            <input type="range" id="edgeIntensity" min="0.1" max="2.0" step="0.1" value="1.0">
-            <div class="switch-row" style="margin-top: 0.5rem;">
-              <label class="switch-label" style="font-size: 0.8rem; color: var(--text-muted);">
+
+          <div id="edgeControls" style="display: none; padding-left: 0.5rem; margin-bottom: 0.75rem; border-left: 2px solid var(--border-subtle);">
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="edgeIntensity">Edge Intensity</label>
+                <span class="val-badge" id="valEdge">1.0</span>
+              </div>
+              <input type="range" id="edgeIntensity" min="0.1" max="2.0" step="0.1" value="1.0">
+            </div>
+            <div class="switch-row">
+              <label class="switch-label">
                 <input type="checkbox" id="invertEdgeColors" checked>
-                Invert Edge Colors (Dark Edges)
+                Invert Edge Map
               </label>
             </div>
           </div>
 
+          <!-- Sharpening -->
           <div class="switch-row">
             <label class="switch-label">
               <input type="checkbox" id="useSharpen">
-              3×3 Sharpening Kernel
+              Unsharp Masking
             </label>
-            <span class="val-badge" id="valSharpen">9</span>
-          </div>
-          <div class="form-group" id="sharpenControls" style="display: none;">
-            <input type="range" id="sharpness" min="1" max="20" step="1" value="9">
           </div>
 
+          <div id="sharpenControls" style="display: none; padding-left: 0.5rem; margin-bottom: 0.75rem; border-left: 2px solid var(--border-subtle);">
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="sharpness">Sharpness Intensity</label>
+                <span class="val-badge" id="valSharpen">9</span>
+              </div>
+              <input type="range" id="sharpness" min="1" max="20" value="9">
+            </div>
+          </div>
+
+          <!-- Thresholding -->
           <div class="switch-row">
             <label class="switch-label">
               <input type="checkbox" id="useThreshold">
-              Hard Thresholding
+              Binary Thresholding
             </label>
-            <span class="val-badge" id="valThreshold">128</span>
           </div>
-          <div class="form-group" id="thresholdControls" style="display: none;">
-            <input type="range" id="thresholdOffset" min="0" max="255" value="128">
+
+          <div id="thresholdControls" style="display: none; padding-left: 0.5rem; margin-bottom: 0.75rem; border-left: 2px solid var(--border-subtle);">
+            <div class="form-group">
+              <div class="form-label-row">
+                <label for="thresholdOffset">Cutoff Threshold</label>
+                <span class="val-badge" id="valThreshold">128</span>
+              </div>
+              <input type="range" id="thresholdOffset" min="0" max="255" value="128">
+            </div>
           </div>
-        </div>
 
-        <!-- Color Grading -->
-        <div class="control-section">
-          <div class="section-title">Color Grading</div>
-
+          <!-- Color Grading -->
           <div class="form-group">
             <div class="form-label-row">
               <label for="contrast">Contrast</label>
@@ -233,7 +277,7 @@
 
           <div class="form-group">
             <div class="form-label-row">
-              <label for="hue">Hue Rotation</label>
+              <label for="hue">Hue Shift</label>
               <span class="val-badge" id="valHue">0°</span>
             </div>
             <input type="range" id="hue" min="0" max="360" value="0">
@@ -241,7 +285,7 @@
 
           <div class="form-group">
             <div class="form-label-row">
-              <label for="grayscale">Grayscale Filter</label>
+              <label for="grayscale">Grayscale</label>
               <span class="val-badge" id="valGrayscale">0%</span>
             </div>
             <input type="range" id="grayscale" min="0" max="100" value="0">
@@ -249,7 +293,7 @@
 
           <div class="form-group">
             <div class="form-label-row">
-              <label for="sepia">Sepia Filter</label>
+              <label for="sepia">Sepia Tone</label>
               <span class="val-badge" id="valSepia">0%</span>
             </div>
             <input type="range" id="sepia" min="0" max="100" value="0">
@@ -262,61 +306,85 @@
             </label>
           </div>
         </div>
-
-        <!-- Action Toolbar -->
-        <div class="action-grid">
-          <button id="btnCopy" class="btn btn-primary">Copy Text</button>
-          <button id="btnDownloadTxt" class="btn btn-secondary">Save .TXT</button>
-          <button id="btnDownloadSvg" class="btn btn-secondary">Export SVG</button>
-          <button id="btnDownloadPng" class="btn btn-secondary">Canvas PNG</button>
-        </div>
       </aside>
 
-      <!-- Right: Live ASCII Output (Sticky on Scroll) -->
+      <!-- Right: Live ASCII Workstation Viewport -->
       <main class="output-panel">
+        <!-- Chassis Titlebar -->
         <div class="output-header">
-          <div class="output-status" id="outputStatus">Rendering...</div>
-          <div style="display: flex; gap: 0.6rem; align-items: center;">
-            <div style="display: flex; gap: 0.35rem; align-items: center;">
-              <label style="font-size: 0.8rem; color: var(--text-muted);">Zoom:</label>
-              <input type="range" id="fontSizeSlider" min="4" max="18" value="9" style="width: 70px;">
-              <span class="val-badge" id="valFontSize">9px</span>
-            </div>
-            <button id="btnFit" class="btn btn-secondary" style="padding: 0.2rem 0.55rem; font-size: 0.75rem;">Fit Screen</button>
+          <div class="window-controls">
+            <span class="window-dot"></span>
+            <span class="window-dot"></span>
+            <span class="window-dot"></span>
+          </div>
+
+          <div class="output-telemetry">
+            <div class="telemetry-pill" id="outputStatus">Initializing...</div>
+          </div>
+
+          <div class="zoom-toolbar">
+            <button type="button" class="zoom-btn" id="btnZoomOut" title="Zoom out font">−</button>
+            <button type="button" class="zoom-btn" id="btnZoomReset" title="Reset font zoom">100%</button>
+            <button type="button" class="zoom-btn" id="btnZoomIn" title="Zoom in font">+</button>
+            <button type="button" class="zoom-btn" id="btnFit" title="Fit to width">Fit</button>
+            <input type="range" id="fontSizeSlider" min="4" max="22" value="9" style="display: none;">
+            <span id="valFontSize" style="display: none;">9px</span>
           </div>
         </div>
+
+        <!-- Canvas Body with Drag Handles -->
         <div class="output-body" id="outputContainer">
-          <div class="ascii-viewport-wrapper" id="resizableWrapper" title="Grab edges or bottom-right corner to resize with mouse">
+          <div class="ascii-viewport-wrapper" id="resizableWrapper" title="Drag corner or edges to resize dimensions">
             <div id="asciiDisplay"></div>
-            <div class="drag-handle handle-br" id="handleBR" title="Drag corner to resize Width & Height"></div>
+            <div class="drag-handle handle-br" id="handleBR" title="Drag corner to freely resize Columns & Rows"></div>
             <div class="drag-handle handle-r" id="handleR" title="Drag right edge to change Width"></div>
             <div class="drag-handle handle-b" id="handleB" title="Drag bottom edge to change Height"></div>
             <div class="drag-dimensions-tag" id="dragDimensionsTag">100 × 55 chars</div>
           </div>
         </div>
+
+        <!-- Floating Bottom Export Bar -->
+        <div class="output-footer">
+          <div class="export-actions">
+            <button id="btnDownloadSvg" class="btn btn-primary" title="Export pure vector SVG for GitHub README">
+              <span>Export SVG (GitHub)</span>
+            </button>
+            <button id="btnCopy" class="btn btn-secondary">Copy ASCII</button>
+            <button id="btnCopyHtml" class="btn btn-secondary">Copy HTML</button>
+            <button id="btnDownloadPng" class="btn btn-secondary">Save PNG</button>
+            <button id="btnDownloadTxt" class="btn btn-secondary">Save .TXT</button>
+          </div>
+        </div>
       </main>
     </div>
 
-    <!-- Drop-in Plugin Quickstart Guide -->
-    <section class="plugin-docs" id="quickstart">
-      <h2>Drop-in Plugin Usage</h2>
-      <p style="color: var(--text-muted); margin-top: 0.25rem;">
-        Enable ASCII art anywhere on your web application simply with HTML attributes or one line of JavaScript:
-      </p>
+    <!-- Developer Quickstart Interactive Console -->
+    <section class="developer-console" id="quickstart">
+      <div class="console-header">
+        <div class="console-title">Integrate HexPic into Your Workflow</div>
+        <div class="console-tabs" id="consoleTabs">
+          <button type="button" class="console-tab active" data-tab="action">GitHub Action</button>
+          <button type="button" class="console-tab" data-tab="cli">CLI (npx)</button>
+          <button type="button" class="console-tab" data-tab="react">React / Next.js</button>
+          <button type="button" class="console-tab" data-tab="mcp">MCP Server</button>
+          <button type="button" class="console-tab" data-tab="vanilla">Vanilla HTML</button>
+        </div>
+      </div>
 
-      <div class="code-box">
-<span style="color: #64748b;">&lt;!-- 1. Include the UMD bundle from CDN or local --&gt;</span>
-&lt;script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"&gt;&lt;/script&gt;
-
-<span style="color: #64748b;">&lt;!-- 2. Add data-hexpic to any image tag --&gt;</span>
-&lt;img src="avatar.png" data-hexpic data-hexpic-width="120" data-hexpic-dithering="atkinson" /&gt;
-
-<span style="color: #64748b;">&lt;!-- 3. Auto-convert with HexPic.init() --&gt;</span>
-&lt;script&gt;
-  HexPic.init();
-&lt;/script&gt;
+      <div class="console-code-wrapper">
+        <div class="console-code-header">
+          <span class="console-lang-tag" id="consoleLangTag">YAML</span>
+          <button type="button" class="btn-copy-code" id="btnCopyCode">Copy Code</button>
+        </div>
+        <pre class="console-code-block" id="consoleCodeBlock"></pre>
       </div>
     </section>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-pill" id="toastPill">
+    <span class="toast-dot"></span>
+    <span id="toastMessage">Copied to clipboard!</span>
   </div>
 
   <script src="./dist/index.umd.js"></script>
@@ -390,9 +458,26 @@
 
     // Action Buttons
     const btnCopy = document.getElementById('btnCopy');
+    const btnCopyHtml = document.getElementById('btnCopyHtml');
+    const btnDownloadSvg = document.getElementById('btnDownloadSvg');
     const btnDownloadTxt = document.getElementById('btnDownloadTxt');
     const btnDownloadPng = document.getElementById('btnDownloadPng');
     const btnReset = document.getElementById('btnReset');
+    const toastPill = document.getElementById('toastPill');
+    const toastMessage = document.getElementById('toastMessage');
+
+    // Zoom Buttons
+    const btnZoomIn = document.getElementById('btnZoomIn');
+    const btnZoomOut = document.getElementById('btnZoomOut');
+    const btnZoomReset = document.getElementById('btnZoomReset');
+
+    function showToast(msg) {
+      toastMessage.textContent = msg;
+      toastPill.classList.add('show');
+      setTimeout(() => {
+        toastPill.classList.remove('show');
+      }, 1800);
+    }
 
     // Load initial sample image
     loadedImage.crossOrigin = 'Anonymous';
@@ -412,7 +497,7 @@
     async function render() {
       if (!loadedImage.complete || !loadedImage.width) return;
       if (!hexpic) {
-        outputStatus.textContent = 'Error: HexPic engine not initialized.';
+        outputStatus.textContent = 'HexPic engine not ready';
         return;
       }
 
@@ -428,22 +513,20 @@
         charset: charsetVal,
         colorMode: colorModeInput.value,
         spaceDensity: parseInt(spaceDensityInput.value, 10),
-        contrast: parseFloat(contrastInput.value),
-        brightness: parseFloat(brightnessInput.value),
-        saturation: parseFloat(saturationInput.value),
-        hue: parseFloat(hueInput.value),
-        grayscale: parseFloat(grayscaleInput.value),
-        sepia: parseFloat(sepiaInput.value),
+        contrast: parseInt(contrastInput.value, 10),
+        brightness: parseInt(brightnessInput.value, 10),
+        saturation: parseInt(saturationInput.value, 10),
+        hue: parseInt(hueInput.value, 10),
+        grayscale: parseInt(grayscaleInput.value, 10),
+        sepia: parseInt(sepiaInput.value, 10),
         invert: invertInput.checked,
         useEdgeDetection: useEdgeDetectionInput.checked,
         edgeIntensity: parseFloat(edgeIntensityInput.value),
         invertEdgeColors: invertEdgeColorsInput.checked,
         useSharpen: useSharpenInput.checked,
-        sharpness: parseFloat(sharpnessInput.value),
+        sharpness: parseInt(sharpnessInput.value, 10),
         useThreshold: useThresholdInput.checked,
-        thresholdOffset: parseInt(thresholdOffsetInput.value, 10),
-        backgroundColor: '#000000',
-        textColor: '#ffffff'
+        thresholdOffset: parseInt(thresholdOffsetInput.value, 10)
       };
 
       try {
@@ -463,7 +546,7 @@
         }
 
         asciiDisplay.style.lineHeight = `${lineHeightSlider.value}em`;
-        outputStatus.textContent = `${currentResult.width}×${currentResult.height} chars | Rendered in ${elapsed}ms`;
+        outputStatus.textContent = `${currentResult.width}×${currentResult.height} chars | ${elapsed}ms`;
       } catch (err) {
         console.error('Render error:', err);
         outputStatus.textContent = `Error: ${err.message}`;
@@ -537,10 +620,97 @@
       render();
     });
 
+    function updateFontSize(val) {
+      fontSizeSlider.value = val;
+      valFontSize.textContent = `${val}px`;
+      asciiDisplay.style.fontSize = `${val}px`;
+      asciiDisplay.style.lineHeight = `${(parseFloat(val) * parseFloat(lineHeightSlider.value))}px`;
+    }
+
     fontSizeSlider.addEventListener('input', () => {
-      valFontSize.textContent = `${fontSizeSlider.value}px`;
-      asciiDisplay.style.fontSize = `${fontSizeSlider.value}px`;
-      asciiDisplay.style.lineHeight = `${(parseFloat(fontSizeSlider.value) * parseFloat(lineHeightSlider.value))}px`;
+      updateFontSize(fontSizeSlider.value);
+    });
+
+    btnZoomIn.addEventListener('click', () => {
+      const cur = parseInt(fontSizeSlider.value, 10);
+      if (cur < 22) updateFontSize(cur + 1);
+    });
+
+    btnZoomOut.addEventListener('click', () => {
+      const cur = parseInt(fontSizeSlider.value, 10);
+      if (cur > 4) updateFontSize(cur - 1);
+    });
+
+    btnZoomReset.addEventListener('click', () => {
+      updateFontSize(9);
+    });
+
+    btnFit.addEventListener('click', () => {
+      if (!currentResult) return;
+      const containerWidth = outputContainer.clientWidth - 48;
+      const idealFontSize = Math.max(4, Math.floor(containerWidth / (currentResult.width * 0.60)));
+      updateFontSize(idealFontSize);
+      showToast(`Fit to viewport (${idealFontSize}px)`);
+    });
+
+    // 1-Click Aesthetic Presets
+    const presetPills = document.querySelectorAll('.preset-pill');
+    presetPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        presetPills.forEach(p => p.classList.remove('active'));
+        pill.classList.add('active');
+        const preset = pill.dataset.preset;
+
+        if (preset === 'mac') {
+          ditheringInput.value = 'atkinson';
+          charsetSelect.value = 'normal';
+          colorModeInput.value = 'monochrome';
+          spaceDensityInput.value = 1; valSpaceDensity.textContent = '1';
+          contrastInput.value = 110; valContrast.textContent = '110%';
+          brightnessInput.value = 100; valBrightness.textContent = '100%';
+          useEdgeDetectionInput.checked = false;
+          document.getElementById('edgeControls').style.display = 'none';
+        } else if (preset === 'matrix') {
+          ditheringInput.value = 'none';
+          charsetSelect.value = 'braille';
+          colorModeInput.value = 'monochrome';
+          spaceDensityInput.value = 2; valSpaceDensity.textContent = '2';
+          contrastInput.value = 135; valContrast.textContent = '135%';
+          brightnessInput.value = 105; valBrightness.textContent = '105%';
+          useEdgeDetectionInput.checked = false;
+          document.getElementById('edgeControls').style.display = 'none';
+        } else if (preset === 'truecolor') {
+          ditheringInput.value = 'atkinson';
+          charsetSelect.value = 'blockelement';
+          colorModeInput.value = 'color';
+          spaceDensityInput.value = 0; valSpaceDensity.textContent = '0';
+          contrastInput.value = 105; valContrast.textContent = '105%';
+          brightnessInput.value = 100; valBrightness.textContent = '100%';
+          useEdgeDetectionInput.checked = false;
+          document.getElementById('edgeControls').style.display = 'none';
+        } else if (preset === 'sobel') {
+          ditheringInput.value = 'none';
+          charsetSelect.value = 'normal';
+          colorModeInput.value = 'monochrome';
+          spaceDensityInput.value = 1; valSpaceDensity.textContent = '1';
+          useEdgeDetectionInput.checked = true;
+          document.getElementById('edgeControls').style.display = 'block';
+          edgeIntensityInput.value = 1.2; valEdge.textContent = '1.2';
+          invertEdgeColorsInput.checked = true;
+        } else if (preset === 'minimalist') {
+          ditheringInput.value = 'floyd-steinberg';
+          charsetSelect.value = 'minimalist';
+          colorModeInput.value = 'monochrome';
+          spaceDensityInput.value = 2; valSpaceDensity.textContent = '2';
+          contrastInput.value = 100; valContrast.textContent = '100%';
+          brightnessInput.value = 100; valBrightness.textContent = '100%';
+          useEdgeDetectionInput.checked = false;
+          document.getElementById('edgeControls').style.display = 'none';
+        }
+
+        render();
+        showToast(`Loaded ${pill.textContent} preset`);
+      });
     });
 
     // Interactive Mouse Resize Dragging Logic
@@ -642,36 +812,10 @@
       render();
     }
 
-    // 1-Click Fit Screen Zoom
-    btnFit.addEventListener('click', () => {
-      if (!currentResult || !currentResult.width) return;
-      const containerW = outputContainer.clientWidth - 50;
-      const containerH = outputContainer.clientHeight - 50;
-      const lineHMultiplier = parseFloat(lineHeightSlider.value) || 0.60;
-      const fitW = containerW / (currentResult.width * 0.60);
-      const fitH = containerH / (currentResult.height * lineHMultiplier);
-      const targetFontSize = Math.max(4, Math.min(18, Math.floor(Math.min(fitW, fitH))));
-      fontSizeSlider.value = targetFontSize;
-      valFontSize.textContent = `${targetFontSize}px`;
-      asciiDisplay.style.fontSize = `${targetFontSize}px`;
-      asciiDisplay.style.lineHeight = `${(targetFontSize * lineHMultiplier)}px`;
-    });
-
-    // File Browse & Drag & Drop Handling
-    dropZone.addEventListener('click', () => {
-      fileInput.click();
-    });
-
-    if (btnChooseFile) {
-      btnChooseFile.addEventListener('click', (e) => {
-        e.stopPropagation();
-        fileInput.click();
-      });
-    }
-
-    fileInput.addEventListener('click', (e) => {
-      e.stopPropagation();
-      fileInput.value = '';
+    // Drag and Drop & File Input
+    btnChooseFile.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('click', (e) => {
+      if (e.target !== btnChooseFile) fileInput.click();
     });
 
     fileInput.addEventListener('change', (e) => {
@@ -715,6 +859,7 @@
           loadedImage = img;
           drawPreview();
           render();
+          showToast('Image loaded successfully');
         };
         img.onerror = (err) => {
           console.error('Image load error:', err);
@@ -729,26 +874,40 @@
       reader.readAsDataURL(file);
     }
 
-    // Action buttons
+    // Export Actions
     btnCopy.addEventListener('click', async () => {
       if (!currentResult) return;
       await currentResult.copyToClipboard();
-      const originalText = btnCopy.textContent;
-      btnCopy.textContent = 'Copied!';
-      setTimeout(() => { btnCopy.textContent = originalText; }, 1200);
+      showToast('ASCII text copied to clipboard!');
+    });
+
+    btnCopyHtml.addEventListener('click', async () => {
+      if (!currentResult) return;
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(currentResult.html);
+      }
+      showToast('Color HTML copied to clipboard!');
     });
 
     btnDownloadTxt.addEventListener('click', () => {
-      if (currentResult) currentResult.saveAsText('hexpic-art.txt');
+      if (currentResult) {
+        currentResult.saveAsText('hexpic-art.txt');
+        showToast('Saved hexpic-art.txt');
+      }
     });
 
-    const btnDownloadSvg = document.getElementById('btnDownloadSvg');
     btnDownloadSvg.addEventListener('click', () => {
-      if (currentResult) currentResult.saveAsSvg('hexpic-art.svg', 12);
+      if (currentResult) {
+        currentResult.saveAsSvg('hexpic-art.svg', 12);
+        showToast('Saved hexpic-art.svg');
+      }
     });
 
     btnDownloadPng.addEventListener('click', () => {
-      if (currentResult) currentResult.saveAsPng('hexpic-art.png', 12);
+      if (currentResult) {
+        currentResult.saveAsPng('hexpic-art.png', 12);
+        showToast('Saved hexpic-art.png');
+      }
     });
 
     btnReset.addEventListener('click', () => {
@@ -777,8 +936,129 @@
       document.getElementById('sharpenControls').style.display = 'none';
       useThresholdInput.checked = false;
       document.getElementById('thresholdControls').style.display = 'none';
+      updateFontSize(9);
+      presetPills.forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-preset="mac"]').classList.add('active');
       render();
+      showToast('Reset all parameters');
     });
+
+    // Developer Quickstart Tabbed Console Code Snippets
+    const CODE_SNIPPETS = {
+      action: {
+        lang: 'YAML',
+        code: `# .github/workflows/hexpic.yml
+name: Generate ASCII Banner
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at midnight
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  banner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate ASCII Art SVG
+        uses: DanielKinnito/hexpic@main
+        with:
+          # Automatically uses your GitHub profile picture
+          output: './assets/banner.svg'
+          width: '70'
+          dithering: 'atkinson'
+      - name: Commit SVG to repo
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: update ascii banner'
+          add: './assets/banner.svg'`
+      },
+      cli: {
+        lang: 'BASH',
+        code: `# Convert your local avatar to an SVG for your GitHub README
+npx hexpic ./profile.png -o ./assets/banner.svg -w 70 --dithering atkinson
+
+# Convert remote GitHub avatar directly
+npx hexpic https://github.com/octocat.png -o octocat.svg -c color
+
+# Print monochrome ASCII text directly to stdout
+npx hexpic ./logo.png -f text -w 40 -c monochrome`
+      },
+      react: {
+        lang: 'TSX',
+        code: `'use client';
+import React from 'react';
+import { HexPicImage } from 'hexpic';
+
+export function ProfileBanner() {
+  return (
+    <HexPicImage
+      src="/avatar.png"
+      alt="Profile Avatar"
+      options={{
+        width: 70,
+        dithering: 'atkinson',
+        colorMode: 'color'
+      }}
+      style={{ fontSize: '9px', lineHeight: '0.60em' }}
+    />
+  );
+}`
+      },
+      mcp: {
+        lang: 'JSON',
+        code: `// claude_desktop_config.json or cursor settings
+{
+  "mcpServers": {
+    "hexpic": {
+      "command": "npx",
+      "args": ["-y", "hexpic-mcp"]
+    }
+  }
+}`
+      },
+      vanilla: {
+        lang: 'HTML',
+        code: `<!-- Include the UMD bundle from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/hexpic/dist/index.umd.js"><\/script>
+
+<!-- Add data-hexpic attribute to any image tag -->
+<img src="avatar.png" data-hexpic data-hexpic-width="80" data-hexpic-dithering="atkinson" />
+
+<script>
+  HexPic.init();
+<\/script>`
+      }
+    };
+
+    const consoleTabs = document.querySelectorAll('.console-tab');
+    const consoleLangTag = document.getElementById('consoleLangTag');
+    const consoleCodeBlock = document.getElementById('consoleCodeBlock');
+    const btnCopyCode = document.getElementById('btnCopyCode');
+
+    function selectTab(tabKey) {
+      consoleTabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tabKey));
+      const snippet = CODE_SNIPPETS[tabKey] || CODE_SNIPPETS.action;
+      consoleLangTag.textContent = snippet.lang;
+      consoleCodeBlock.textContent = snippet.code;
+    }
+
+    consoleTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        selectTab(tab.dataset.tab);
+      });
+    });
+
+    btnCopyCode.addEventListener('click', async () => {
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(consoleCodeBlock.textContent);
+      }
+      showToast('Code snippet copied!');
+    });
+
+    // Default tab
+    selectTab('action');
   </script>
 </body>
 </html>

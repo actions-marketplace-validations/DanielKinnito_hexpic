@@ -127,3 +127,4 @@ runs:
         fi
 
         node "${{ github.action_path }}/dist/bin/hexpic.js" "${ARGS[@]}"
+
