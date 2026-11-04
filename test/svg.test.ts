@@ -46,3 +46,4 @@ describe('asciiToSvg', () => {
     expect(svg).toContain('fill="rgb(0,255,0)">BBB</tspan>');
   });
 });
+
