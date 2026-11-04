@@ -258,4 +258,53 @@ describe('HexPic', () => {
       expect(typeof result.copyToClipboard).toBe('function');
     });
   });
+
+  describe('fromPixels (Headless Node / Worker processing)', () => {
+    it('should convert raw RGBA pixel buffers directly to ASCII without canvas', () => {
+      const width = 20;
+      const height = 20;
+      const pixels = new Uint8ClampedArray(width * height * 4);
+
+      // Create a gradient: left dark, right bright
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const idx = (y * width + x) * 4;
+          const val = Math.floor((x / width) * 255);
+          pixels[idx] = val;     // R
+          pixels[idx + 1] = val; // G
+          pixels[idx + 2] = val; // B
+          pixels[idx + 3] = 255; // A
+        }
+      }
+
+      const result = hexpic.fromPixels(pixels, width, height, {
+        width: 10,
+        preserveAspectRatio: false
+      });
+
+      expect(result).toBeDefined();
+      expect(result.width).toBe(10);
+      expect(typeof result.ascii).toBe('string');
+      expect(result.ascii.split('\n').length).toBeGreaterThan(0);
+    });
+
+    it('should support colorMode, dithering, and edge detection in headless pixel mode', () => {
+      const width = 16;
+      const height = 16;
+      const pixels = new Uint8ClampedArray(width * height * 4).fill(200);
+
+      const result = hexpic.fromPixels(pixels, width, height, {
+        width: 8,
+        height: 8,
+        colorMode: 'color',
+        dithering: 'atkinson',
+        useEdgeDetection: true,
+        preserveAspectRatio: false
+      });
+
+      expect(result.html).toContain('<span style="color:');
+      expect(result.colors).toBeDefined();
+      expect(result.colors?.length).toBe(8);
+    });
+  });
 });

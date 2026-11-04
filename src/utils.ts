@@ -79,19 +79,16 @@ export function getAsciiChar(brightness: number, charset: string, gamma = 1.5): 
 }
 
 /**
- * Applies a 3x3 Sobel convolution filter to emphasize visual edges and outlines.
+ * Applies Sobel 3x3 convolution to a raw RGBA pixel buffer to accentuate outlines.
  */
-export function applyEdgeDetection(
-  ctx: CanvasRenderingContext2D,
+export function applyEdgeDetectionToPixels(
+  src: Uint8ClampedArray | Uint8Array,
   width: number,
   height: number,
   intensity: number,
   invertColors = true
-): void {
-  const imgData = ctx.getImageData(0, 0, width, height);
-  const src = imgData.data;
+): Uint8ClampedArray {
   const output = new Uint8ClampedArray(src.length);
-
   const kx = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
   const ky = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
 
@@ -128,6 +125,21 @@ export function applyEdgeDetection(
     }
   }
 
+  return output;
+}
+
+/**
+ * Applies a 3x3 Sobel convolution filter to emphasize visual edges and outlines.
+ */
+export function applyEdgeDetection(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  intensity: number,
+  invertColors = true
+): void {
+  const imgData = ctx.getImageData(0, 0, width, height);
+  const output = applyEdgeDetectionToPixels(imgData.data, width, height, intensity, invertColors);
   putImageDataSafe(ctx, output, width, height);
 }
 
@@ -154,16 +166,14 @@ function putImageDataSafe(ctx: CanvasRenderingContext2D, data: Uint8ClampedArray
 }
 
 /**
- * Applies a 3x3 unsharp convolution sharpening kernel to make fine details pop.
+ * Applies a 3x3 unsharp convolution sharpening kernel to raw RGBA pixel data.
  */
-export function applySharpen(
-  ctx: CanvasRenderingContext2D,
+export function applySharpenToPixels(
+  src: Uint8ClampedArray | Uint8Array,
   width: number,
   height: number,
   sharpness: number
-): void {
-  const imgData = ctx.getImageData(0, 0, width, height);
-  const src = imgData.data;
+): Uint8ClampedArray {
   const output = new Uint8ClampedArray(src.length);
   const kernel = [-1, -1, -1, -1, sharpness, -1, -1, -1, -1];
 
@@ -197,7 +207,109 @@ export function applySharpen(
     }
   }
 
+  return output;
+}
+
+/**
+ * Applies a 3x3 unsharp convolution sharpening kernel to make fine details pop.
+ */
+export function applySharpen(
+  ctx: CanvasRenderingContext2D,
+  width: number,
+  height: number,
+  sharpness: number
+): void {
+  const imgData = ctx.getImageData(0, 0, width, height);
+  const output = applySharpenToPixels(imgData.data, width, height, sharpness);
   putImageDataSafe(ctx, output, width, height);
+}
+
+/**
+ * Resamples an RGBA pixel buffer to target dimensions.
+ */
+export function resamplePixels(
+  src: Uint8ClampedArray | Uint8Array,
+  srcWidth: number,
+  srcHeight: number,
+  dstWidth: number,
+  dstHeight: number
+): Uint8ClampedArray {
+  const dst = new Uint8ClampedArray(dstWidth * dstHeight * 4);
+  const xRatio = srcWidth / dstWidth;
+  const yRatio = srcHeight / dstHeight;
+
+  for (let y = 0; y < dstHeight; y++) {
+    for (let x = 0; x < dstWidth; x++) {
+      const srcX = Math.min(srcWidth - 1, Math.floor(x * xRatio));
+      const srcY = Math.min(srcHeight - 1, Math.floor(y * yRatio));
+      const srcIdx = (srcY * srcWidth + srcX) * 4;
+      const dstIdx = (y * dstWidth + x) * 4;
+
+      dst[dstIdx] = src[srcIdx];
+      dst[dstIdx + 1] = src[srcIdx + 1];
+      dst[dstIdx + 2] = src[srcIdx + 2];
+      dst[dstIdx + 3] = src[srcIdx + 3];
+    }
+  }
+
+  return dst;
+}
+
+/**
+ * Adjusts color parameters of raw RGBA pixels without canvas.
+ */
+export function adjustPixelsColor(
+  pixels: Uint8ClampedArray,
+  options: {
+    contrast?: number;
+    brightness?: number;
+    grayscale?: number;
+    invert?: boolean;
+  }
+): void {
+  const { contrast = 100, brightness = 100, grayscale = 0, invert = false } = options;
+  if (contrast === 100 && brightness === 100 && grayscale === 0 && !invert) {
+    return;
+  }
+
+  const cFactor = contrast / 100;
+  const bFactor = brightness / 100;
+  const gFactor = grayscale / 100;
+
+  for (let i = 0; i < pixels.length; i += 4) {
+    let r = pixels[i];
+    let g = pixels[i + 1];
+    let b = pixels[i + 2];
+
+    if (bFactor !== 1) {
+      r *= bFactor;
+      g *= bFactor;
+      b *= bFactor;
+    }
+
+    if (cFactor !== 1) {
+      r = (r - 128) * cFactor + 128;
+      g = (g - 128) * cFactor + 128;
+      b = (b - 128) * cFactor + 128;
+    }
+
+    if (gFactor > 0) {
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      r = r * (1 - gFactor) + lum * gFactor;
+      g = g * (1 - gFactor) + lum * gFactor;
+      b = b * (1 - gFactor) + lum * gFactor;
+    }
+
+    if (invert) {
+      r = 255 - r;
+      g = 255 - g;
+      b = 255 - b;
+    }
+
+    pixels[i] = Math.min(255, Math.max(0, Math.round(r)));
+    pixels[i + 1] = Math.min(255, Math.max(0, Math.round(g)));
+    pixels[i + 2] = Math.min(255, Math.max(0, Math.round(b)));
+  }
 }
 
 /**

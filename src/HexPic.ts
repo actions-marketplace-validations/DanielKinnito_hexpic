@@ -6,6 +6,10 @@ import {
   getAsciiChar,
   applyEdgeDetection,
   applySharpen,
+  applyEdgeDetectionToPixels,
+  applySharpenToPixels,
+  resamplePixels,
+  adjustPixelsColor,
   applySimpleThresholding,
   renderColorHtml,
   asciiToCanvas,
@@ -62,8 +66,8 @@ function escapeHtml(str: string): string {
  */
 export class HexPic {
   private options: Required<AsciiArtOptions>;
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private canvas?: HTMLCanvasElement;
+  private ctx?: CanvasRenderingContext2D;
 
   /**
    * Creates a new HexPic instance
@@ -71,12 +75,33 @@ export class HexPic {
    */
   constructor(options: AsciiArtOptions = {}) {
     this.options = { ...DEFAULT_OPTIONS, ...options };
-    this.canvas = document.createElement('canvas');
-    const ctx = this.canvas.getContext('2d', { willReadFrequently: true });
-    if (!ctx) {
-      throw new Error('Could not create canvas context');
+    if (typeof document !== 'undefined') {
+      try {
+        const c = document.createElement('canvas');
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        if (ctx) {
+          this.canvas = c;
+          this.ctx = ctx;
+        }
+      } catch {
+        // Safe fallback in headless / test environments
+      }
     }
-    this.ctx = ctx;
+  }
+
+  private ensureCanvas(): { canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D } {
+    if (!this.canvas || !this.ctx) {
+      if (typeof document === 'undefined') {
+        throw new Error('Canvas rendering is not supported in a headless environment. Use fromPixels() instead.');
+      }
+      this.canvas = document.createElement('canvas');
+      const ctx = this.canvas.getContext('2d', { willReadFrequently: true });
+      if (!ctx) {
+        throw new Error('Could not create canvas context');
+      }
+      this.ctx = ctx;
+    }
+    return { canvas: this.canvas, ctx: this.ctx };
   }
 
   /**
@@ -245,12 +270,13 @@ export class HexPic {
     const canvasWidth = width + 2 * frame;
     const canvasHeight = height + 2 * frame;
 
-    this.canvas.width = canvasWidth;
-    this.canvas.height = canvasHeight;
+    const { canvas, ctx } = this.ensureCanvas();
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
 
     // 1. Draw background
-    this.ctx.fillStyle = backgroundColor;
-    this.ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    ctx.fillStyle = backgroundColor;
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
     // 2. Apply CSS color-grading filters before drawing image
     const filters: string[] = [];
@@ -262,32 +288,144 @@ export class HexPic {
     if (sepia !== 0) filters.push(`sepia(${sepia}%)`);
     if (invert) filters.push('invert(100%)');
 
-    this.ctx.filter = filters.length > 0 ? filters.join(' ') : 'none';
-    this.ctx.drawImage(image, frame, frame, width, height);
-    this.ctx.filter = 'none';
+    ctx.filter = filters.length > 0 ? filters.join(' ') : 'none';
+    ctx.drawImage(image, frame, frame, width, height);
+    ctx.filter = 'none';
 
     // 3. Spatial convolutions: Edge detection and sharpening
     if (useEdgeDetection) {
-      applyEdgeDetection(this.ctx, canvasWidth, canvasHeight, edgeIntensity, invertEdgeColors);
+      applyEdgeDetection(ctx, canvasWidth, canvasHeight, edgeIntensity, invertEdgeColors);
     }
     if (useSharpen) {
-      applySharpen(this.ctx, canvasWidth, canvasHeight, sharpness);
+      applySharpen(ctx, canvasWidth, canvasHeight, sharpness);
     }
 
     // 4. Retrieve pixel data
-    const imgData = this.ctx.getImageData(0, 0, canvasWidth, canvasHeight);
-    const data = imgData.data;
+    const imgData = ctx.getImageData(0, 0, canvasWidth, canvasHeight);
+    return this.processPixelData(imgData.data, canvasWidth, canvasHeight, currentOptions);
+  }
 
-    // 5. Binary thresholding if enabled
-    if (useThreshold) {
-      applySimpleThresholding(data, canvasWidth, canvasHeight, thresholdOffset);
+  /**
+   * Converts a raw RGBA pixel buffer directly to ASCII art without requiring a browser DOM or Canvas.
+   * Ideal for Node.js servers, Web Workers, and MCP tool execution.
+   */
+  public fromPixels(
+    pixels: Uint8ClampedArray | Uint8Array,
+    sourceWidth: number,
+    sourceHeight: number,
+    options?: AsciiArtOptions
+  ): AsciiArtResult {
+    const currentOptions = { ...this.options, ...options };
+    const {
+      width: targetWidth,
+      height: targetHeight,
+      preserveAspectRatio,
+      fontAspectRatio,
+      transparentFrame,
+      useEdgeDetection,
+      edgeIntensity,
+      invertEdgeColors,
+      useSharpen,
+      sharpness,
+      contrast,
+      brightness,
+      grayscale,
+      invert
+    } = currentOptions;
+
+    // Calculate dimensions
+    const isExplicitHeight = options?.height !== undefined && options.height > 0;
+    let width = targetWidth;
+    let height = isExplicitHeight ? targetHeight : 0;
+
+    if (!preserveAspectRatio && isExplicitHeight) {
+      width = targetWidth;
+      height = targetHeight;
+    } else {
+      const imageAspect = (sourceWidth || 1) / (sourceHeight || 1);
+      const correctedAspect = imageAspect / fontAspectRatio;
+
+      if (isExplicitHeight && preserveAspectRatio) {
+        if (targetWidth / targetHeight > correctedAspect) {
+          width = Math.max(1, Math.floor(targetHeight * correctedAspect));
+          height = targetHeight;
+        } else {
+          width = targetWidth;
+          height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+        }
+      } else {
+        width = targetWidth;
+        height = Math.max(1, Math.floor(targetWidth / correctedAspect));
+      }
     }
 
-    // 6. Resolve character palette with space density padding
+    const frame = Math.max(0, transparentFrame);
+    const canvasWidth = width + 2 * frame;
+    const canvasHeight = height + 2 * frame;
+
+    // Resample pixels to target width & height
+    let data = resamplePixels(pixels, sourceWidth, sourceHeight, width, height);
+
+    // Apply frame padding if needed
+    if (frame > 0) {
+      const framed = new Uint8ClampedArray(canvasWidth * canvasHeight * 4);
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const srcIdx = (y * width + x) * 4;
+          const dstIdx = ((y + frame) * canvasWidth + (x + frame)) * 4;
+          framed[dstIdx] = data[srcIdx];
+          framed[dstIdx + 1] = data[srcIdx + 1];
+          framed[dstIdx + 2] = data[srcIdx + 2];
+          framed[dstIdx + 3] = data[srcIdx + 3];
+        }
+      }
+      data = framed;
+    }
+
+    // Color grading adjustments
+    adjustPixelsColor(data, { contrast, brightness, grayscale, invert });
+
+    // Spatial convolution filters
+    if (useEdgeDetection) {
+      data = applyEdgeDetectionToPixels(data, canvasWidth, canvasHeight, edgeIntensity, invertEdgeColors);
+    }
+    if (useSharpen) {
+      data = applySharpenToPixels(data, canvasWidth, canvasHeight, sharpness);
+    }
+
+    return this.processPixelData(data, canvasWidth, canvasHeight, currentOptions);
+  }
+
+  /**
+   * Internal pixel processing pipeline: Binary thresholding -> Luminance matrix -> Error-diffusion dithering -> ASCII quantization
+   */
+  public processPixelData(
+    data: Uint8ClampedArray | Uint8Array,
+    canvasWidth: number,
+    canvasHeight: number,
+    currentOptions: Required<AsciiArtOptions>
+  ): AsciiArtResult {
+    const {
+      charset,
+      dithering,
+      colorMode,
+      useThreshold,
+      thresholdOffset,
+      spaceDensity,
+      backgroundColor,
+      textColor
+    } = currentOptions;
+
+    // 1. Binary thresholding if enabled
+    if (useThreshold) {
+      applySimpleThresholding(data as Uint8ClampedArray, canvasWidth, canvasHeight, thresholdOffset);
+    }
+
+    // 2. Resolve character palette with space density padding
     const resolvedCharset = resolveCharset(charset, spaceDensity);
     const charsetLen = resolvedCharset.length;
 
-    // 7. Populate luminance matrix
+    // 3. Populate luminance matrix
     const lum = new Float32Array(canvasWidth * canvasHeight);
     for (let y = 0; y < canvasHeight; y++) {
       for (let x = 0; x < canvasWidth; x++) {
@@ -300,7 +438,7 @@ export class HexPic {
       }
     }
 
-    // 8. Dithering Error Diffusion
+    // 4. Dithering Error Diffusion
     if (dithering !== 'none' && charsetLen > 1) {
       const steps = charsetLen - 1;
 
@@ -360,7 +498,7 @@ export class HexPic {
       }
     }
 
-    // 9. Generate characters and colors
+    // 5. Generate characters and colors
     const lines: string[] = [];
     const colors: CharColor[][] = [];
     const isColor = colorMode === 'color';
@@ -410,6 +548,9 @@ export class HexPic {
         await copyTextToClipboard(ascii);
       },
       saveAsText(filename = 'ascii-art.txt'): void {
+        if (typeof Blob === 'undefined') {
+          throw new Error('saveAsText requires a browser environment. Use result.ascii in Node.js.');
+        }
         const blob = new Blob([ascii], { type: 'text/plain;charset=utf-8' });
         downloadBlob(blob, filename);
       },
